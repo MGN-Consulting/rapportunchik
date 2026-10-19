@@ -54,11 +54,13 @@ Because **Wails V3** is inherently a cross-platform foundation, we will also **a
 
 ## 🌐 Localization & Languages (i18n)
 
-- 🇮🇹 **Italian (Italiano)**: **Currently implemented** — all timesheet fields, working presets, UI terminology, and official PDF statements are tailored for Italian labor conventions.
-- 🇬🇧 **English**: **Coming soon** in an upcoming release.
-- 🇷🇺 **Russian (Русский)**: **Coming soon** in an upcoming release.
+Rapportunchik provides complete multi-language internationalization across the entire desktop application and pure-Go PDF generation engine:
 
-Language switching will be configurable directly inside the Profile & Settings view.
+- 🇮🇹 **Italian (Italiano)**: Fully implemented — tailored for Italian labor conventions and commercial timesheets.
+- 🇬🇧 **English**: Fully implemented — comprehensive English terminology across all panels, metrics, presets, and exported PDF reports.
+- 🇷🇺 **Russian (Русский)**: Fully implemented — full Cyrillic support with embedded UTF-8 typography in both the UI and exported PDF reports.
+
+Language switching is accessible directly inside the **Profile & Settings** view, updating the interface and PDF export template in real time.
 
 ---
 
@@ -66,7 +68,7 @@ Language switching will be configurable directly inside the Profile & Settings v
 
 ### 📅 1. Full-Width Animated Timeline (`Main Page`)
 - **Centered Day Ribbon**: Smooth horizontal scrolling ribbon highlighting the active date with an accent glow.
-- **Adjacent Day Ticks**: Immediate context of previous and upcoming workdays with weekday names and numbers.
+- **Adjacent Day Ticks**: Immediate context of previous and upcoming workdays with localized weekday names and numbers.
 - **💰 Cash Bag Badges**: Worked days receive an embossed golden cash bag badge right on the timeline!
 - **Fast Navigation**: One-click day switching, keyboard arrow support, and date picker integration.
 
@@ -87,12 +89,12 @@ Pre-configured for standard hybrid schedules with automatic morning/afternoon sp
 - **All-Time Metrics**: Staggered readout of absolute total hours worked and total days logged since the beginning of collaboration (`16/10/2026`).
 - **Historical Month Selector**: Bold interactive month header (`1° Mese`) opening a modal popup to inspect past performance.
 
-### 📄 4. One-Click Italian Rapportino PDF Engine
-- Pure Go PDF generator (built with `github.com/jung-kurt/gofpdf`) with full CP1252 accent support.
-- Fully formatted Italian business document containing:
+### 📄 4. Multilingual Rapportino PDF Engine (Italian, English, Russian)
+- Pure Go PDF generator (built with `github.com/jung-kurt/gofpdf`) with embedded UTF-8 TrueType fonts (`Inter`) ensuring pristine rendering of Latin, accented, and Cyrillic glyphs.
+- Fully formatted business document containing:
   - Header with Committente (*MGN Consulting*) & Collaborator fiscal data (P.IVA, C.F., IBAN, addresses).
-  - Summary KPI cards: Giorni Lavorati, Totale Ore, Tariffa Giornaliera (160 €), Compenso Lordo.
-  - Granular table of each worked day (Date, Luogo, Orari, Totale Ore, Obiettivo, Descrizione Attività).
+  - Summary KPI cards: Giorni Lavorati / Days Worked, Totale Ore / Total Hours, Tariffa / Daily Rate, Compenso / Total Compensation.
+  - Granular table of each worked day (Date, Workplace, Shifts, Total Hours, Objective, Detailed Activity).
   - Formal dual signature block (*Firma del Collaboratore* & *Firma del Committente per Approvazione*).
 - Directly opens in macOS **Preview** and saves to `~/Documents/Rapportini/Rapportino_YYYY_MM.pdf`.
 

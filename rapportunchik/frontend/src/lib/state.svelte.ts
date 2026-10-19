@@ -6,6 +6,7 @@ import type {
   OverallStats,
   MonthOption
 } from '../../bindings/changeme';
+import { i18n, type Locale } from './i18n';
 
 export class AppState {
   activeTab = $state<'main' | 'stats' | 'profile'>('main');
@@ -28,6 +29,7 @@ export class AppState {
   private autoSaveDebounce: ReturnType<typeof setTimeout> | null = null;
 
   async init() {
+    i18n.init();
     try {
       await this.loadProfile();
       await this.loadAvailableMonths();
@@ -36,7 +38,7 @@ export class AppState {
       await this.loadOverallStats();
     } catch (err) {
       console.error('Initialization error:', err);
-      this.showToast('Errore di connessione a MongoDB', 'error');
+      this.showToast(i18n.t.toasts.mongoConnectError, 'error');
     }
   }
 
@@ -45,6 +47,9 @@ export class AppState {
       const p = await RapportService.GetProfile();
       if (p) {
         this.profile = p;
+        if (p.language) {
+          i18n.init(p.language);
+        }
       }
     } catch (err) {
       console.error('Failed to load profile:', err);
@@ -158,7 +163,7 @@ export class AppState {
     } catch (err) {
       console.error('Failed to save day log:', err);
       this.saveStatus = 'error';
-      this.showToast('Errore durante il salvataggio su MongoDB', 'error');
+      this.showToast(i18n.t.toasts.saveError, 'error');
     }
   }
 
@@ -170,22 +175,25 @@ export class AppState {
     };
     await this.saveDay(updated);
     this.showToast(
-      updated.isWorked ? 'Giorno contrassegnato come Lavorato (💰 +160 €)' : 'Contrassegno lavorato rimosso',
+      updated.isWorked ? i18n.t.toasts.dayWorkedActive : i18n.t.toasts.dayWorkedRemoved,
       'success'
     );
   }
 
   async saveProfile(p: Profile) {
     try {
+      if (p.language) {
+        i18n.setLocale(p.language as Locale);
+      }
       await RapportService.SaveProfile(p);
       this.profile = p;
       await this.loadMonthSummary(this.selectedYear, this.selectedMonth);
       await this.loadOverallStats();
       await this.loadDay(this.selectedDate);
-      this.showToast('Profilo e impostazioni salvate con successo!', 'success');
+      this.showToast(i18n.t.toasts.profileSaved, 'success');
     } catch (err) {
       console.error('Failed to save profile:', err);
-      this.showToast('Errore nel salvataggio del profilo', 'error');
+      this.showToast(i18n.t.toasts.profileError, 'error');
     }
   }
 
@@ -193,10 +201,10 @@ export class AppState {
     try {
       this.isPrinting = true;
       const path = await RapportService.PrintRapportino(this.selectedYear, this.selectedMonth);
-      this.showToast(`Rapportino generato! Salvato in: ${path}`, 'success');
+      this.showToast(i18n.t.toasts.pdfSuccess(path), 'success');
     } catch (err) {
       console.error('Failed to generate PDF:', err);
-      this.showToast('Errore durante la generazione del PDF', 'error');
+      this.showToast(i18n.t.toasts.pdfError, 'error');
     } finally {
       this.isPrinting = false;
     }

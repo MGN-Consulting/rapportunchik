@@ -90,11 +90,11 @@ func TestBackendFlow(t *testing.T) {
 		t.Errorf("Expected total money earned >= 160, got %f", stats.TotalMoneyEarned)
 	}
 
-	// 6. Test PDF Generation
+	// 6. Test PDF Generation (Italian, English, and Russian)
 	pdfService := NewPDFService()
 	pdfPath, err := pdfService.GenerateRapportinoPDF(profile, summary)
 	if err != nil {
-		t.Fatalf("Failed to generate PDF: %v", err)
+		t.Fatalf("Failed to generate Italian PDF: %v", err)
 	}
 
 	fileInfo, err := os.Stat(pdfPath)
@@ -104,5 +104,32 @@ func TestBackendFlow(t *testing.T) {
 	if fileInfo.Size() < 500 {
 		t.Errorf("Generated PDF file is unusually small (%d bytes)", fileInfo.Size())
 	}
-	t.Logf("PDF successfully generated at %s (%d bytes)", pdfPath, fileInfo.Size())
+	t.Logf("Italian PDF successfully generated at %s (%d bytes)", pdfPath, fileInfo.Size())
+
+	// Test English PDF
+	profile.Language = "en"
+	pdfPathEn, err := pdfService.GenerateRapportinoPDF(profile, summary)
+	if err != nil {
+		t.Fatalf("Failed to generate English PDF: %v", err)
+	}
+	if _, err := os.Stat(pdfPathEn); err != nil {
+		t.Fatalf("English PDF missing: %v", err)
+	}
+	t.Logf("English PDF successfully generated at %s", pdfPathEn)
+
+	// Test Russian PDF with Cyrillic characters in descriptions
+	profile.Language = "ru"
+	ruSummary := *summary
+	if len(ruSummary.Days) > 0 {
+		ruSummary.Days[0].Objective = "JIRA-RU-104"
+		ruSummary.Days[0].Description = "Разработка и тестирование модуля локализации на русском языке."
+	}
+	pdfPathRu, err := pdfService.GenerateRapportinoPDF(profile, &ruSummary)
+	if err != nil {
+		t.Fatalf("Failed to generate Russian PDF: %v", err)
+	}
+	if _, err := os.Stat(pdfPathRu); err != nil {
+		t.Fatalf("Russian PDF missing: %v", err)
+	}
+	t.Logf("Russian PDF successfully generated at %s", pdfPathRu)
 }

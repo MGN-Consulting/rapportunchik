@@ -1,14 +1,13 @@
 <script lang="ts">
   import { appState } from '../state.svelte';
+  import { i18n } from '../i18n';
   import { ChevronLeft, ChevronRight } from 'lucide-svelte';
 
   let containerEl: HTMLElement | null = null;
 
-  const italianDaysShort = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
-
   function getWeekdayShort(dateStr: string): string {
     const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? '' : italianDaysShort[d.getDay()];
+    return isNaN(d.getTime()) ? '' : (i18n.t.timeline.weekdaysShort[d.getDay()] ?? '');
   }
 
   function scrollToActive() {
@@ -48,7 +47,7 @@
 </script>
 
 <div class="timeline-wrapper">
-  <button class="nav-arrow left" onclick={prevDay} title="Giorno precedente">
+  <button class="nav-arrow left" onclick={prevDay} title={i18n.t.timeline.prevDay}>
     <ChevronLeft size={18} />
   </button>
 
@@ -65,7 +64,7 @@
         >
           <!-- Cash Bag badge if worked -->
           {#if day.isWorked}
-            <div class="cash-badge" title="Giorno Lavorato (+160 €)">
+            <div class="cash-badge" title={`${i18n.t.timeline.workedBadge} (+${appState.profile?.dailyRate ?? 160} €)`}>
               <span class="cash-icon">💰</span>
             </div>
           {:else}
@@ -82,11 +81,12 @@
           <!-- Workplace tag or non-working status -->
           <div class="tick-status">
             {#if !day.isWorkingDay}
-              <span class="dot off" title="Giorno non lavorativo"></span>
-            {:else if day.workLocation === 'In Sede'}
-              <span class="dot office" title="In Sede"></span>
+              <span class="dot off" title={i18n.t.schedule.nonWorkingDay}></span>
             {:else}
-              <span class="dot remote" title="Smart-working"></span>
+              <span
+                class="dot {day.workLocation === 'In Sede' ? 'office' : 'remote'}"
+                title={i18n.getLocationLabel(day.workLocation)}
+              ></span>
             {/if}
           </div>
         </button>
@@ -94,7 +94,7 @@
     {/if}
   </div>
 
-  <button class="nav-arrow right" onclick={nextDay} title="Giorno successivo">
+  <button class="nav-arrow right" onclick={nextDay} title={i18n.t.timeline.nextDay}>
     <ChevronRight size={18} />
   </button>
 </div>

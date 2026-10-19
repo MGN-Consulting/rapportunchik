@@ -1,9 +1,8 @@
 <script lang="ts">
   import { appState } from '../state.svelte';
+  import { i18n } from '../i18n';
   import { FileText, Target, Tag, Sparkles } from 'lucide-svelte';
   import type { WorkDayLog } from '../../../bindings/changeme';
-
-  const quickObjectives = ['JIRA-', 'Formazione', 'Refactoring', 'Bugfixing', 'Code Review', 'Allineamento'];
 
   function handleInput() {
     if (!appState.currentDayLog) return;
@@ -12,11 +11,7 @@
 
   function applyQuickObjective(tag: string) {
     if (!appState.currentDayLog) return;
-    if (tag === 'JIRA-') {
-      appState.currentDayLog.objective = tag;
-    } else {
-      appState.currentDayLog.objective = tag;
-    }
+    appState.currentDayLog.objective = tag;
     handleInput();
   }
 </script>
@@ -25,9 +20,9 @@
   <div class="panel-header">
     <div class="header-title">
       <FileText size={18} class="accent-icon" />
-      <h3>Attività & Obiettivo della Giornata</h3>
+      <h3>{i18n.t.activity.title}</h3>
     </div>
-    <span class="badge-empty">Vuoto di default</span>
+    <span class="badge-empty">{i18n.t.activity.defaultEmptyBadge}</span>
   </div>
 
   {#if appState.currentDayLog}
@@ -36,13 +31,13 @@
       <div class="form-group">
         <label for="objective-input" class="group-label">
           <Target size={14} />
-          <span>Obiettivo / Task di Lavoro</span>
+          <span>{i18n.t.activity.objectiveLabel}</span>
         </label>
         <div class="input-wrapper">
           <input
             id="objective-input"
             type="text"
-            placeholder="Es. PROJ-1042, Formazione, Refactoring modulo auth..."
+            placeholder={i18n.t.activity.objectivePlaceholder}
             bind:value={appState.currentDayLog.objective}
             oninput={handleInput}
           />
@@ -50,8 +45,8 @@
 
         <!-- Quick Tags -->
         <div class="quick-tags">
-          <span class="tags-label"><Tag size={12} /> Suggeriti:</span>
-          {#each quickObjectives as tag}
+          <span class="tags-label"><Tag size={12} /> {i18n.t.activity.quickTagsLabel}:</span>
+          {#each i18n.t.activity.quickTags as tag}
             <button
               type="button"
               class="tag-btn"
@@ -67,12 +62,12 @@
       <div class="form-group flex-1">
         <label for="desc-input" class="group-label">
           <FileText size={14} />
-          <span>Descrizione Dettagliata Attività</span>
+          <span>{i18n.t.activity.descriptionLabel}</span>
         </label>
         <div class="textarea-wrapper">
           <textarea
             id="desc-input"
-            placeholder="Descrivi dettagliatamente cosa hai realizzato oggi per il Rapportino mensile..."
+            placeholder={i18n.t.activity.descriptionPlaceholder}
             bind:value={appState.currentDayLog.description}
             oninput={handleInput}
           ></textarea>
@@ -83,7 +78,7 @@
       <div class="activity-tips">
         <Sparkles size={14} class="tips-icon" />
         <span>
-          Le modifiche vengono salvate automaticamente in background nel database MongoDB locale.
+          {i18n.t.activity.autoSaveHint}
         </span>
       </div>
     </div>

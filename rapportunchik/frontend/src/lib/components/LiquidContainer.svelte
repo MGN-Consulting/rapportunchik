@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { appState } from '../state.svelte';
+  import { i18n } from '../i18n';
   import { Trophy, Sparkles } from 'lucide-svelte';
 
   let canvasEl: HTMLCanvasElement;
@@ -158,13 +159,13 @@
     <div class="liquid-overlay">
       <div class="target-header">
         <Trophy size={20} class="trophy-icon" />
-        <span class="target-title">Obiettivo Complessivo Fatturato</span>
+        <span class="target-title">{i18n.t.stats.liquidTargetTitle}</span>
       </div>
 
       <div class="cash-accumulated">
         <span class="currency">€</span>
         <span class="amount">
-          {(appState.overallStats?.totalMoneyEarned || 0).toLocaleString('it-IT', {
+          {(appState.overallStats?.totalMoneyEarned || 0).toLocaleString(i18n.currentLocale === 'ru' ? 'ru-RU' : i18n.currentLocale === 'en' ? 'en-US' : 'it-IT', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           })}
@@ -174,7 +175,7 @@
       <div class="target-badge">
         <Sparkles size={14} />
         <span>
-          Target: € {(appState.overallStats?.revenueTarget || 20000).toLocaleString('it-IT')}
+          Target: € {(appState.overallStats?.revenueTarget || 20000).toLocaleString(i18n.currentLocale === 'ru' ? 'ru-RU' : i18n.currentLocale === 'en' ? 'en-US' : 'it-IT')}
         </span>
       </div>
 
@@ -182,7 +183,7 @@
         <span class="pct-val">
           {(appState.overallStats?.liquidFillPercent || 0).toFixed(1)}%
         </span>
-        <span class="pct-label">raggiunto</span>
+        <span class="pct-label">{i18n.t.stats.liquidProgressBadge}</span>
       </div>
     </div>
   </div>

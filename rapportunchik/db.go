@@ -141,6 +141,7 @@ func DefaultProfile() Profile {
 		FirstDayOfWork:    "2026-10-16",
 		DailyRate:         160.0,
 		RevenueTarget:     20000.0,
+		Language:          "it",
 		WeekdayPresets:    presets,
 	}
 }
@@ -161,6 +162,10 @@ func (d *Database) GetProfile() (*Profile, error) {
 			return &def, nil
 		}
 		return nil, fmt.Errorf("failed to fetch profile: %w", err)
+	}
+
+	if profile.Language == "" {
+		profile.Language = "it"
 	}
 
 	// Ensure all weekday presets are populated

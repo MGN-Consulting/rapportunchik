@@ -1,5 +1,6 @@
 <script lang="ts">
   import { appState } from '../state.svelte';
+  import { i18n } from '../i18n';
   import { Printer, Calendar, Clock, Award, Loader2, ChevronDown } from 'lucide-svelte';
   import LiquidContainer from '../components/LiquidContainer.svelte';
   import MonthSelectorModal from '../components/MonthSelectorModal.svelte';
@@ -17,17 +18,17 @@
   <div class="stats-left">
     <!-- Top Left: Current number of months worked -->
     <div class="month-indicator-zone">
-      <div class="zone-label">Mese di Lavoro Attivo</div>
+      <div class="zone-label">{i18n.t.stats.activeMonthLabel}</div>
       <button
         class="month-selector-btn"
         onclick={() => (appState.isMonthModalOpen = true)}
-        title="Clicca per selezionare un altro mese"
+        title={i18n.t.stats.monthSelectorTitle}
       >
         <div class="big-month-number">
-          {appState.monthSummary?.monthIndex || 1}° Mese
+          {i18n.t.stats.monthIndexLabel(appState.monthSummary?.monthIndex || 1)}
         </div>
         <div class="month-name-sub">
-          <span>{appState.monthSummary?.monthName || 'Ottobre 2026'}</span>
+          <span>{i18n.getMonthName(appState.selectedMonth)} {appState.selectedYear}</span>
           <ChevronDown size={18} class="chevron-icon" />
         </div>
       </button>
@@ -42,10 +43,10 @@
       >
         {#if appState.isPrinting}
           <Loader2 size={18} class="spin" />
-          <span>Generazione PDF in corso...</span>
+          <span>{i18n.t.stats.generatingPdf}</span>
         {:else}
           <Printer size={18} />
-          <span>Stampa Rapportino ({appState.monthSummary?.monthName})</span>
+          <span>{i18n.t.stats.printBtnLabel(i18n.getMonthName(appState.selectedMonth))}</span>
         {/if}
       </button>
     </div>
@@ -53,10 +54,10 @@
     <!-- Monthly Cash Progress Bar -->
     <div class="progress-zone">
       <div class="progress-labels">
-        <span class="p-title">Progresso Incasso Mensile</span>
+        <span class="p-title">{i18n.t.stats.monthlyProgressTitle}</span>
         <span class="p-val">
-          € {monthlyCurrent.toLocaleString('it-IT', { minimumFractionDigits: 2 })} / €{' '}
-          {monthlyExpected.toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+          € {monthlyCurrent.toLocaleString(i18n.currentLocale === 'ru' ? 'ru-RU' : i18n.currentLocale === 'en' ? 'en-US' : 'it-IT', { minimumFractionDigits: 2 })} / €{' '}
+          {monthlyExpected.toLocaleString(i18n.currentLocale === 'ru' ? 'ru-RU' : i18n.currentLocale === 'en' ? 'en-US' : 'it-IT', { minimumFractionDigits: 2 })}
         </span>
       </div>
 
@@ -70,7 +71,7 @@
       </div>
 
       <div class="progress-caption">
-        <span>{appState.monthSummary?.workedDays || 0} giorni lavorati su {appState.monthSummary?.expectedWorkingDays || 0} previsti</span>
+        <span>{i18n.t.stats.workedDaysOfExpected(appState.monthSummary?.workedDays || 0, appState.monthSummary?.expectedWorkingDays || 0)}</span>
         <span class="p-pct">{monthlyPercent}%</span>
       </div>
     </div>
@@ -84,12 +85,12 @@
         </div>
         <div class="metric-details">
           <div class="metric-num">
-            {(appState.overallStats?.totalHoursWorked || 0).toLocaleString('it-IT', {
+            {(appState.overallStats?.totalHoursWorked || 0).toLocaleString(i18n.currentLocale === 'ru' ? 'ru-RU' : i18n.currentLocale === 'en' ? 'en-US' : 'it-IT', {
               minimumFractionDigits: 1,
               maximumFractionDigits: 1
             })}
           </div>
-          <div class="metric-label">Ore Totali Lavorate (da inizio collaborazione)</div>
+          <div class="metric-label">{i18n.t.stats.totalHoursWorked}</div>
         </div>
       </div>
 
@@ -102,7 +103,7 @@
           <div class="metric-num">
             {appState.overallStats?.totalDaysWorked || 0}
           </div>
-          <div class="metric-label">Giorni Totali Lavorati (da inizio collaborazione)</div>
+          <div class="metric-label">{i18n.t.stats.totalDaysWorked}</div>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { appState } from '../state.svelte';
+  import { i18n } from '../i18n';
   import { Calendar, X, Check } from 'lucide-svelte';
 
   function handleBackdrop(e: MouseEvent) {
@@ -15,19 +16,25 @@
       <div class="modal-header">
         <div class="header-title">
           <Calendar size={18} class="accent-icon" />
-          <h3>Seleziona Mese di Lavoro</h3>
+          <h3>{i18n.t.stats.monthSelectorTitle}</h3>
         </div>
         <button
           class="close-btn"
           onclick={() => (appState.isMonthModalOpen = false)}
-          title="Chiudi"
+          title="Close"
         >
           <X size={16} />
         </button>
       </div>
 
       <p class="modal-desc">
-        Scegli il mese per consultare lo storico, verificare le presenze o generare il relativo Rapportino PDF:
+        {#if i18n.currentLocale === 'en'}
+          Choose a month to review history, verify attendance, or generate the PDF timesheet:
+        {:else if i18n.currentLocale === 'ru'}
+          Выберите месяц для просмотра истории, проверки табеля или экспорта PDF-отчета:
+        {:else}
+          Scegli il mese per consultare lo storico, verificare le presenze o generare il relativo Rapportino PDF:
+        {/if}
       </p>
 
       <div class="month-grid">
@@ -39,8 +46,8 @@
             class:active={isCurrent}
             onclick={() => appState.selectMonth(opt.year, opt.month)}
           >
-            <div class="month-badge">Mese {opt.monthIndex}</div>
-            <div class="month-name">{opt.monthName}</div>
+            <div class="month-badge">{i18n.t.stats.monthIndexLabel(opt.monthIndex)}</div>
+            <div class="month-name">{i18n.getMonthName(opt.month)} {opt.year}</div>
             {#if isCurrent}
               <div class="active-check">
                 <Check size={14} strokeWidth={3} />

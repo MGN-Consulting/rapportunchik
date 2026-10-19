@@ -1,5 +1,6 @@
 <script lang="ts">
   import { appState } from '../state.svelte';
+  import { i18n } from '../i18n';
   import { Calendar, BarChart3, Settings, CheckCircle2, Loader2, AlertCircle } from 'lucide-svelte';
 </script>
 
@@ -9,7 +10,7 @@
       <div class="logo-circle"></div>
       <span class="logo-text">Rapportunchik</span>
     </div>
-    <span class="subtitle">Collaborazione P.IVA</span>
+    <span class="subtitle">{i18n.t.nav.brandSubtitle}</span>
   </div>
 
   <nav class="nav-tabs no-drag">
@@ -19,7 +20,7 @@
       onclick={() => (appState.activeTab = 'main')}
     >
       <Calendar size={15} />
-      <span>Rapportino</span>
+      <span>{i18n.t.nav.timesheet}</span>
     </button>
 
     <button
@@ -28,7 +29,7 @@
       onclick={() => (appState.activeTab = 'stats')}
     >
       <BarChart3 size={15} />
-      <span>Statistiche</span>
+      <span>{i18n.t.nav.stats}</span>
     </button>
 
     <button
@@ -37,7 +38,7 @@
       onclick={() => (appState.activeTab = 'profile')}
     >
       <Settings size={15} />
-      <span>Impostazioni</span>
+      <span>{i18n.t.nav.profile}</span>
     </button>
   </nav>
 
@@ -45,17 +46,17 @@
     {#if appState.saveStatus === 'saving'}
       <div class="status-badge saving">
         <Loader2 size={13} class="spin" />
-        <span>Salvataggio...</span>
+        <span>{i18n.t.nav.statusSaving}</span>
       </div>
     {:else if appState.saveStatus === 'saved'}
       <div class="status-badge saved">
         <CheckCircle2 size={13} />
-        <span>Salvato su MongoDB</span>
+        <span>{i18n.t.nav.statusSaved}</span>
       </div>
     {:else if appState.saveStatus === 'error'}
       <div class="status-badge error">
         <AlertCircle size={13} />
-        <span>Errore DB</span>
+        <span>{i18n.t.nav.statusError}</span>
       </div>
     {/if}
   </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { appState } from '../state.svelte';
+  import { i18n } from '../i18n';
   import { Building2, Home, Clock, Lock, Unlock, Check, Sparkles } from 'lucide-svelte';
   import type { WorkDayLog } from '../../../bindings/changeme';
 
@@ -45,21 +46,21 @@
   <div class="panel-header">
     <div class="header-title">
       <Clock size={18} class="accent-icon" />
-      <h3>Orari & Luogo di Lavoro</h3>
+      <h3>{i18n.t.schedule.title}</h3>
     </div>
 
     <button
       class="unlock-btn"
       class:unlocked={isUnlocked}
       onclick={() => (isUnlocked = !isUnlocked)}
-      title={isUnlocked ? 'Blocca orari' : 'Sblocca per modificare i valori precompilati'}
+      title={isUnlocked ? i18n.t.schedule.lockTooltip : i18n.t.schedule.unlockTooltip}
     >
       {#if isUnlocked}
         <Unlock size={14} />
-        <span>Modifica attiva</span>
+        <span>{i18n.t.schedule.editActive}</span>
       {:else}
         <Lock size={14} />
-        <span>Precompilato (Clicca per modificare)</span>
+        <span>{i18n.t.schedule.editLocked}</span>
       {/if}
     </button>
   </div>
@@ -68,7 +69,7 @@
     <div class="panel-body" class:greyed-out={!isUnlocked}>
       <!-- Working day toggle -->
       <div class="form-row toggle-row">
-        <label for="working-day-toggle" class="row-label">Tipologia Giornata</label>
+        <label for="working-day-toggle" class="row-label">{i18n.t.schedule.dayType}</label>
         <button
           id="working-day-toggle"
           class="switch-btn"
@@ -77,14 +78,14 @@
         >
           <span class="switch-ball"></span>
           <span class="switch-text">
-            {appState.currentDayLog.isWorkingDay ? 'Giorno Lavorativo' : 'Giorno Non Lavorativo'}
+            {appState.currentDayLog.isWorkingDay ? i18n.t.schedule.workingDay : i18n.t.schedule.nonWorkingDay}
           </span>
         </button>
       </div>
 
       <!-- Workplace selector -->
       <div class="form-row">
-        <span class="row-label">Luogo di Lavoro</span>
+        <span class="row-label">{i18n.t.schedule.workplace}</span>
         <div class="location-group">
           <button
             class="loc-btn"
@@ -92,7 +93,7 @@
             onclick={() => toggleLocation('In Sede')}
           >
             <Building2 size={16} />
-            <span>In Sede (Ufficio)</span>
+            <span>{i18n.t.schedule.locations.inOffice}</span>
           </button>
 
           <button
@@ -101,7 +102,7 @@
             onclick={() => toggleLocation('Smart-working')}
           >
             <Home size={16} />
-            <span>Smart-working (Remoto)</span>
+            <span>{i18n.t.schedule.locations.smartworking}</span>
           </button>
         </div>
       </div>
@@ -110,7 +111,7 @@
       <div class="shifts-grid">
         <!-- Morning shift -->
         <div class="shift-card">
-          <div class="shift-label">Mattina</div>
+          <div class="shift-label">{i18n.t.schedule.morningShift}</div>
           <div class="time-range">
             <input
               type="time"
@@ -130,7 +131,7 @@
 
         <!-- Afternoon shift -->
         <div class="shift-card">
-          <div class="shift-label">Pomeriggio</div>
+          <div class="shift-label">{i18n.t.schedule.afternoonShift}</div>
           <div class="time-range">
             <input
               type="time"
@@ -151,8 +152,8 @@
 
       <!-- Total daily hours calculated -->
       <div class="hours-summary">
-        <span class="hours-label">Totale Ore Lavorative Calcolate:</span>
-        <span class="hours-value">{appState.currentDayLog.totalHours} ore</span>
+        <span class="hours-label">{i18n.t.schedule.totalCalculatedHours}</span>
+        <span class="hours-value">{appState.currentDayLog.totalHours} {i18n.t.schedule.hoursUnit}</span>
       </div>
     </div>
 
@@ -169,15 +170,15 @@
               <Check size={18} strokeWidth={3} />
             </div>
             <div class="btn-text">
-              <span class="main-title">Giorno Lavorato Confermato</span>
-              <span class="sub-title">160 € accreditati al calcolo mensile</span>
+              <span class="main-title">{i18n.t.schedule.workedConfirmedTitle}</span>
+              <span class="sub-title">{i18n.t.schedule.workedConfirmedSub}</span>
             </div>
             <span class="cash-emoji">💰</span>
           {:else}
             <Sparkles size={18} />
             <div class="btn-text">
-              <span class="main-title">Segna Giorno come Lavorato</span>
-              <span class="sub-title">Attiva il compenso di 160 € per oggi</span>
+              <span class="main-title">{i18n.t.schedule.markAsWorkedTitle}</span>
+              <span class="sub-title">{i18n.t.schedule.markAsWorkedSub}</span>
             </div>
             <span class="cash-emoji">💰</span>
           {/if}

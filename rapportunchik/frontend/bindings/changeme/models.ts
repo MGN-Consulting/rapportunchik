@@ -69,6 +69,11 @@ export interface Profile {
     "revenueTarget": number;
 
     /**
+     * "it" | "en" | "ru"
+     */
+    "language": string;
+
+    /**
      * "0".."6", 0=Sunday
      */
     "weekdayPresets": { [_ in string]?: DayPreset } | null;

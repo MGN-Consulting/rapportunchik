@@ -1,5 +1,7 @@
 <script lang="ts">
   import { appState } from '../state.svelte';
+  import { i18n } from '../i18n';
+  import type { Locale } from '../i18n/types';
   import {
     Building2,
     User,
@@ -9,7 +11,8 @@
     Save,
     Sparkles,
     CheckCircle2,
-    Shield
+    Shield,
+    Globe
   } from 'lucide-svelte';
   import type { Profile, DayPreset } from '../../../bindings/changeme';
 
@@ -24,15 +27,17 @@
     }
   });
 
-  const dayNames = [
-    { key: '1', name: 'Lunedì' },
-    { key: '2', name: 'Martedì' },
-    { key: '3', name: 'Mercoledì' },
-    { key: '4', name: 'Giovedì' },
-    { key: '5', name: 'Venerdì' },
-    { key: '6', name: 'Sabato' },
-    { key: '0', name: 'Domenica' }
-  ];
+  const dayKeyIndexMap: Record<string, number> = {
+    '1': 0,
+    '2': 1,
+    '3': 2,
+    '4': 3,
+    '5': 4,
+    '6': 5,
+    '0': 6
+  };
+
+  const dayKeys = ['1', '2', '3', '4', '5', '6', '0'];
 
   interface ScheduleItem {
     key: string;
@@ -43,14 +48,24 @@
   let scheduleList = $derived.by<ScheduleItem[]>(() => {
     if (!form.weekdayPresets) return [];
     const list: ScheduleItem[] = [];
-    for (const d of dayNames) {
-      const p = form.weekdayPresets[d.key];
+    for (const key of dayKeys) {
+      const p = form.weekdayPresets[key];
       if (p) {
-        list.push({ key: d.key, name: d.name, preset: p });
+        const name = i18n.t.profile.weekdays[dayKeyIndexMap[key]] ?? key;
+        list.push({ key, name, preset: p });
       }
     }
     return list;
   });
+
+  let currentSelectedLang = $derived<Locale>(
+    (form.language as Locale) || i18n.currentLocale || 'it'
+  );
+
+  function selectLanguage(loc: Locale) {
+    form.language = loc;
+    i18n.setLocale(loc);
+  }
 
   function calcHours(mStart: string, mEnd: string, aStart: string, aEnd: string): number {
     const parseM = (t: string) => {
@@ -75,27 +90,95 @@
 <div class="profile-view">
   <div class="profile-header">
     <div class="header-info">
-      <h2>Impostazioni & Profilo</h2>
-      <p>Gestisci i dati fiscali del Committente, del Collaboratore e le regole di orario predefinite.</p>
+      <h2>{i18n.t.profile.headerTitle}</h2>
+      <p>{i18n.t.profile.headerSubtitle}</p>
     </div>
 
     <button class="save-main-btn" onclick={handleSave}>
       <Save size={16} />
-      <span>Salva Modifiche</span>
+      <span>{i18n.t.profile.saveBtn}</span>
     </button>
   </div>
 
   <div class="cards-grid">
+    <!-- Language Selection Card -->
+    <div class="settings-card full-width language-card">
+      <div class="card-title">
+        <Globe size={18} class="accent-icon" />
+        <h3>{i18n.t.profile.languageCardTitle}</h3>
+      </div>
+
+      <p class="section-desc">
+        {i18n.t.profile.languageCardDesc}
+      </p>
+
+      <div class="language-options">
+        <button
+          type="button"
+          class="lang-choice-btn"
+          class:selected={currentSelectedLang === 'it'}
+          onclick={() => selectLanguage('it')}
+        >
+          <span class="flag">🇮🇹</span>
+          <div class="lang-text">
+            <span class="lang-title">{i18n.t.profile.languages.it}</span>
+            <span class="lang-sub">Italiano</span>
+          </div>
+          {#if currentSelectedLang === 'it'}
+            <div class="check-pill">
+              <CheckCircle2 size={16} />
+            </div>
+          {/if}
+        </button>
+
+        <button
+          type="button"
+          class="lang-choice-btn"
+          class:selected={currentSelectedLang === 'en'}
+          onclick={() => selectLanguage('en')}
+        >
+          <span class="flag">🇬🇧</span>
+          <div class="lang-text">
+            <span class="lang-title">{i18n.t.profile.languages.en}</span>
+            <span class="lang-sub">English</span>
+          </div>
+          {#if currentSelectedLang === 'en'}
+            <div class="check-pill">
+              <CheckCircle2 size={16} />
+            </div>
+          {/if}
+        </button>
+
+        <button
+          type="button"
+          class="lang-choice-btn"
+          class:selected={currentSelectedLang === 'ru'}
+          onclick={() => selectLanguage('ru')}
+        >
+          <span class="flag">🇷🇺</span>
+          <div class="lang-text">
+            <span class="lang-title">{i18n.t.profile.languages.ru}</span>
+            <span class="lang-sub">Русский</span>
+          </div>
+          {#if currentSelectedLang === 'ru'}
+            <div class="check-pill">
+              <CheckCircle2 size={16} />
+            </div>
+          {/if}
+        </button>
+      </div>
+    </div>
+
     <!-- Card 1: Dati Committente -->
     <div class="settings-card">
       <div class="card-title">
         <Building2 size={18} class="accent-icon" />
-        <h3>Dati Committente (Azienda)</h3>
+        <h3>{i18n.t.profile.clientCardTitle}</h3>
       </div>
 
       <div class="card-fields">
         <div class="field">
-          <label for="client-name">Ragione Sociale Committente</label>
+          <label for="client-name">{i18n.t.profile.labels.clientCompanyName}</label>
           <input
             id="client-name"
             type="text"
@@ -105,7 +188,7 @@
         </div>
 
         <div class="field">
-          <label for="client-piva">Partita IVA / Codice Fiscale</label>
+          <label for="client-piva">{i18n.t.profile.labels.clientPiva}</label>
           <input
             id="client-piva"
             type="text"
@@ -115,7 +198,7 @@
         </div>
 
         <div class="field">
-          <label for="client-addr">Indirizzo Sede Legale</label>
+          <label for="client-addr">{i18n.t.profile.labels.clientAddress}</label>
           <input
             id="client-addr"
             type="text"
@@ -125,7 +208,7 @@
         </div>
 
         <div class="field">
-          <label for="client-contact">Referente / Email Amministrazione</label>
+          <label for="client-contact">{i18n.t.profile.labels.clientContact}</label>
           <input
             id="client-contact"
             type="text"
@@ -140,12 +223,12 @@
     <div class="settings-card">
       <div class="card-title">
         <User size={18} class="accent-icon" />
-        <h3>Dati Collaboratore (Partita IVA)</h3>
+        <h3>{i18n.t.profile.contractorCardTitle}</h3>
       </div>
 
       <div class="card-fields">
         <div class="field">
-          <label for="contractor-name">Nome e Cognome</label>
+          <label for="contractor-name">{i18n.t.profile.labels.contractorName}</label>
           <input
             id="contractor-name"
             type="text"
@@ -156,7 +239,7 @@
 
         <div class="fields-row">
           <div class="field">
-            <label for="contractor-piva">Partita IVA</label>
+            <label for="contractor-piva">{i18n.t.profile.labels.contractorPiva}</label>
             <input
               id="contractor-piva"
               type="text"
@@ -165,7 +248,7 @@
             />
           </div>
           <div class="field">
-            <label for="contractor-cf">Codice Fiscale</label>
+            <label for="contractor-cf">{i18n.t.profile.labels.contractorCf}</label>
             <input
               id="contractor-cf"
               type="text"
@@ -176,7 +259,7 @@
         </div>
 
         <div class="field">
-          <label for="contractor-addr">Indirizzo di Fatturazione</label>
+          <label for="contractor-addr">{i18n.t.profile.labels.contractorAddress}</label>
           <input
             id="contractor-addr"
             type="text"
@@ -186,7 +269,7 @@
         </div>
 
         <div class="field">
-          <label for="contractor-iban">Coordinate di Pagamento (IBAN)</label>
+          <label for="contractor-iban">{i18n.t.profile.labels.contractorIban}</label>
           <input
             id="contractor-iban"
             type="text"
@@ -201,22 +284,22 @@
     <div class="settings-card full-width">
       <div class="card-title">
         <Euro size={18} class="accent-icon" />
-        <h3>Parametri di Contratto & Target Finanziario</h3>
+        <h3>{i18n.t.profile.contractCardTitle}</h3>
       </div>
 
       <div class="contract-fields-grid">
         <div class="field">
-          <label for="first-day">Data Inizio Lavoro</label>
+          <label for="first-day">{i18n.t.profile.labels.firstDayOfWork}</label>
           <input
             id="first-day"
             type="date"
             bind:value={form.firstDayOfWork}
           />
-          <span class="hint">Inizio collaborazione stabilito al 16/10/2026</span>
+          <span class="hint">{i18n.t.profile.labels.firstDayHint}</span>
         </div>
 
         <div class="field">
-          <label for="daily-rate">Tariffa Giornaliera (€ / giorno)</label>
+          <label for="daily-rate">{i18n.t.profile.labels.dailyRate}</label>
           <div class="input-with-affix">
             <input
               id="daily-rate"
@@ -227,11 +310,19 @@
             />
             <span class="affix">€ / gg</span>
           </div>
-          <span class="hint">Valore predefinito: 160 € per giorno lavorato</span>
+          <span class="hint">
+            {#if i18n.currentLocale === 'ru'}
+              По умолчанию: 160 € за рабочий день
+            {:else if i18n.currentLocale === 'en'}
+              Default: 160 € per worked day
+            {:else}
+              Valore predefinito: 160 € per giorno lavorato
+            {/if}
+          </span>
         </div>
 
         <div class="field">
-          <label for="target-revenue">Obiettivo Fatturato Complessivo (€)</label>
+          <label for="target-revenue">{i18n.t.profile.labels.revenueTarget}</label>
           <div class="input-with-affix">
             <input
               id="target-revenue"
@@ -242,7 +333,15 @@
             />
             <span class="affix">€ Totali</span>
           </div>
-          <span class="hint">Target per il serbatoio liquido (default: 20.000 €)</span>
+          <span class="hint">
+            {#if i18n.currentLocale === 'ru'}
+              Целевой объем для жидкого резервуара (по умолчанию: 20 000 €)
+            {:else if i18n.currentLocale === 'en'}
+              Target for the liquid wave reservoir (default: 20,000 €)
+            {:else}
+              Target per il serbatoio liquido (default: 20.000 €)
+            {/if}
+          </span>
         </div>
       </div>
     </div>
@@ -251,23 +350,29 @@
     <div class="settings-card full-width">
       <div class="card-title">
         <Clock size={18} class="accent-icon" />
-        <h3>Regole Orarie Predefinite per Giorno della Settimana</h3>
+        <h3>{i18n.t.profile.presetsCardTitle}</h3>
       </div>
 
       <p class="section-desc">
-        Questi valori vengono utilizzati per precompilare automaticamente ogni giornata nel Rapportino:
+        {#if i18n.currentLocale === 'ru'}
+          Эти значения используются для автозаполнения каждого дня в табеле:
+        {:else if i18n.currentLocale === 'en'}
+          These values are used to automatically pre-fill each day in the timesheet:
+        {:else}
+          Questi valori vengono utilizzati per precompilare automaticamente ogni giornata nel Rapportino:
+        {/if}
       </p>
 
       <div class="schedule-table-wrapper">
         <table class="schedule-table">
           <thead>
             <tr>
-              <th>Giorno</th>
-              <th>Lavorativo</th>
-              <th>Luogo Predefinito</th>
-              <th>Fascia Mattina</th>
-              <th>Fascia Pomeriggio</th>
-              <th>Ore Totali</th>
+              <th>{i18n.t.profile.labels.colDay}</th>
+              <th>{i18n.t.profile.labels.colWorking}</th>
+              <th>{i18n.t.profile.labels.colLocation}</th>
+              <th>{i18n.t.profile.labels.colMorning}</th>
+              <th>{i18n.t.profile.labels.colAfternoon}</th>
+              <th>{i18n.t.profile.labels.colTotalHours}</th>
             </tr>
           </thead>
           <tbody>
@@ -282,8 +387,8 @@
                 </td>
                 <td>
                   <select bind:value={item.preset.workLocation}>
-                    <option value="In Sede">In Sede (Ufficio)</option>
-                    <option value="Smart-working">Smart-working (Remoto)</option>
+                    <option value="In Sede">{i18n.t.schedule.locations.inOffice}</option>
+                    <option value="Smart-working">{i18n.t.schedule.locations.smartworking}</option>
                   </select>
                 </td>
                 <td>
@@ -397,6 +502,74 @@
 
   .settings-card.full-width {
     grid-column: 1 / -1;
+  }
+
+  .language-card {
+    border-color: rgba(147, 168, 255, 0.2);
+    background: linear-gradient(135deg, rgba(21, 26, 53, 0.85) 0%, rgba(14, 18, 36, 0.85) 100%);
+  }
+
+  .language-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .lang-choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(8, 10, 20, 0.65);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+  }
+
+  .lang-choice-btn:hover {
+    border-color: rgba(147, 168, 255, 0.35);
+    background: rgba(14, 18, 36, 0.85);
+    transform: translateY(-2px);
+  }
+
+  .lang-choice-btn.selected {
+    border-color: var(--accent-primary);
+    background: rgba(51, 82, 255, 0.14);
+    box-shadow: 0 0 16px rgba(51, 82, 255, 0.25);
+  }
+
+  .flag {
+    font-size: 26px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .lang-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .lang-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .lang-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .check-pill {
+    color: var(--accent-highlight);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .card-title {

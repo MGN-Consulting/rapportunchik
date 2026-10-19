@@ -24,6 +24,7 @@ type Profile struct {
 	FirstDayOfWork    string               `bson:"firstDayOfWork" json:"firstDayOfWork"` // YYYY-MM-DD (2026-10-16)
 	DailyRate         float64              `bson:"dailyRate" json:"dailyRate"`           // 160.0
 	RevenueTarget     float64              `bson:"revenueTarget" json:"revenueTarget"`   // 20000.0
+	Language          string               `bson:"language,omitempty" json:"language"`   // "it" | "en" | "ru"
 	WeekdayPresets    map[string]DayPreset `bson:"weekdayPresets" json:"weekdayPresets"` // "0".."6", 0=Sunday
 }
 
