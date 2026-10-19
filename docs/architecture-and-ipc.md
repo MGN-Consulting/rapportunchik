@@ -98,27 +98,27 @@ Sets the specified profile ID as the active working profile in both memory and p
 - **Behavior**: Updates active profile pointer; subsequent calculations (monthly summary, daily rates, PDF generator) immediately use this profile.
 
 #### `GetWorkDayLog(dateStr: string): Promise<models.WorkDayLog>`
-Fetches the log for a specific date (`YYYY-MM-DD`).
+Fetches the log for a specific date (`YYYY-MM-DD`) scoped to the currently active profile.
 - **Parameters**: `dateStr` (e.g., `"2026-10-19"`)
-- **Behavior**: Checks `work_logs` collection. If absent, derives default hours and location from the weekday preset stored in `Profile`.
+- **Behavior**: Checks `work_logs` collection by composite ID `fmt.Sprintf("%s_%s", profileId, dateStr)` or `{ profileId, date }`. If absent, derives default hours and location from the active profile's weekday presets.
 
 #### `SetWorkDayLog(log: models.WorkDayLog): Promise<void>`
-Saves or updates daily activity logs with automatic total hour calculation.
+Saves or updates daily activity logs scoped strictly to the active profile with automatic total hour calculation.
 - **Parameters**: `models.WorkDayLog` object
-- **Behavior**: MongoDB upsert based on the unique `date` index. Debounced by 400ms on the frontend during typing.
+- **Behavior**: MongoDB upsert based on the unique compound key `{ profileId: 1, date: 1 }` (`_id: "${profileId}_${date}"`). Debounced by 400ms on the frontend during typing.
 
 #### `GetMonthSummary(year: number, month: number): Promise<models.MonthSummary>`
-Calculates all worked days, total hours, and gross pay for the selected month.
+Calculates all worked days, total hours, and gross pay for the selected month for the active client.
 - **Parameters**: `year` (int), `month` (1–12)
-- **Aggregation**: Queries all logs between `YYYY-MM-01` and `YYYY-MM-LastDay` where `is_worked == true`.
+- **Aggregation**: Queries all logs matching `profileId == activeProfileID` between `YYYY-MM-01` and `YYYY-MM-LastDay` where `is_worked == true`.
 
 #### `GetOverallStats(): Promise<models.OverallStats>`
-Aggregates all-time performance metrics since collaboration inception (`2026-10-16`).
+Aggregates all-time performance metrics strictly for the active client since collaboration inception.
 - **Return Fields**:
-  - `TotalHours`: Absolute hours worked across all months.
-  - `TotalDays`: Absolute number of confirmed worked days.
-  - `TotalMoney`: Accumulated gross earnings (`TotalDays × DailyRate`).
-  - `TargetRevenue`: Financial milestone target (default: `20,000.00 €`).
+  - `TotalHours`: Absolute hours worked for the active profile.
+  - `TotalDays`: Absolute number of confirmed worked days for the active profile.
+  - `TotalMoney`: Accumulated gross earnings (`TotalDays × ActiveDailyRate`).
+  - `TargetRevenue`: Financial milestone target from the active profile (`profile.RevenueTarget`).
   - `TargetPercent`: Progress percentage towards the target milestone.
   - `MonthsWorked`: Count of active collaboration months.
 
@@ -154,7 +154,7 @@ export class AppState {
 ```
 
 ### 4.1 Profile Selector Modal & Navigation Guard
-1. **Interactive Client Modal Popup**: Clicking the navbar profile pill opens `<ProfileSelectorModal />`. Users can switch between stored client profiles or choose "+ Aggiungi nuovo committente", which navigates directly to the Settings tab with a fresh pre-filled template.
+1. **Interactive Client Modal Popup**: Clicking the navbar profile pill opens `<ProfileSelectorModal />`. Users can switch between stored client profiles or choose *"Aggiungi un nuovo committente"*, which navigates directly to the Settings tab with a fresh pre-filled template.
 2. **Immutable State & Reference Cloning**: `appState.saveProfile()` and `loadProfile()` clone profile objects (`JSON.parse(JSON.stringify(p))`) to eliminate memory reference aliasing, ensuring that editing fields in `ProfileView` reliably triggers the reactive `isDirty` derived rune even after immediate language switches.
 3. **Dirty-State Button Activation**: The "Salva Modifiche" button remains disabled by default; it activates only when modifications exist and a client company name is entered.
 4. **Instant Language Auto-Save**: Changing the active locale immediately persists the profile to MongoDB via `saveProfile()`.

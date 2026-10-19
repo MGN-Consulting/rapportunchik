@@ -80,6 +80,9 @@ export interface Profile {
 }
 
 export interface WorkDayLog {
+    "id": string;
+    "profileId": string;
+
     /**
      * YYYY-MM-DD
      */

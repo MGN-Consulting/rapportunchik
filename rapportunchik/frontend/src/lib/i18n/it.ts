@@ -6,7 +6,7 @@ export const it: TranslationSchema = {
     profileSelectorAria: 'Seleziona Profilo Committente',
     profileModalTitle: 'Profili Committenti',
     profileModalDesc: 'Seleziona un committente per consultare i relativi dati o aggiungine uno nuovo:',
-    addNewProfileBtn: '+ Aggiungi nuovo committente',
+    addNewProfileBtn: 'Aggiungi un nuovo committente',
     activeProfileBadge: 'Attivo',
     dailyRateBadge: (rate: number) => `€ ${rate}/giorno`,
     timesheet: 'Rapportino',

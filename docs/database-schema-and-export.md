@@ -78,24 +78,28 @@ Stores the client company information, collaborator tax credentials, contract pa
 
 ### 2.2 The `work_logs` Collection
 
-Stores daily activity logs, work locations, shifts, hours worked, objectives, and task descriptions.
+Stores daily activity logs, work locations, shifts, hours worked, objectives, and task descriptions, isolated per client profile.
 
 #### JSON Schema Specification
 
 ```json
 {
-  "_id": { "$oid": "6713c7a2e8f1a14b3f8101a9" },
+  "_id": "default_2026-10-19",
+  "profileId": "default",
   "date": "2026-10-19",
-  "is_worked": true,
-  "location": "In Sede",
-  "morning_start": "09:10",
-  "morning_end": "14:00",
-  "afternoon_start": "14:30",
-  "afternoon_end": "17:10",
-  "total_hours": 7.5,
+  "year": 2026,
+  "month": 10,
+  "day": 19,
+  "isWorked": true,
+  "workLocation": "In Sede",
+  "morningStart": "09:10",
+  "morningEnd": "14:00",
+  "afternoonStart": "14:30",
+  "afternoonEnd": "17:10",
+  "totalHours": 7.5,
   "objective": "JIRA-1042 Formazione Wails",
   "description": "Implemented Svelte 5 state management and connected MongoDB local driver.",
-  "updated_at": { "$date": "2026-10-19T14:35:00.000Z" }
+  "updatedAt": "2026-10-19T14:35:00Z"
 }
 ```
 
@@ -103,8 +107,10 @@ Stores daily activity logs, work locations, shifts, hours worked, objectives, an
 
 | Collection | Key | Type | Properties | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
-| `work_logs` | `date` | Single Field (Ascending) | `unique: true` | Fast daily lookup & prevents duplicate date entries |
-| `work_logs` | `is_worked`, `date` | Compound Index | Standard | Accelerates monthly summary and overall stats aggregations |
+| `work_logs` | `profileId`, `date` | Compound Index | `unique: true` | Scopes work logs per client profile & prevents duplicate daily entries |
+| `work_logs` | `profileId`, `isWorked` | Compound Index | Standard | Accelerates monthly summary and overall stats aggregations per profile |
+| `profiles` | `_id` | Single Field | `unique: true` | Primary key identifier for client profiles |
+| `settings` | `_id` | Single Field | `unique: true` | Application runtime state (stores active profile pointer) |
 
 ---
 

@@ -296,6 +296,7 @@ export class AppState {
       await RapportService.SetActiveProfile(id);
       await this.loadProfile();
       await this.loadAllProfiles();
+      await this.loadAvailableMonths();
       await this.loadMonthSummary(this.selectedYear, this.selectedMonth);
       await this.loadOverallStats();
       await this.loadDay(this.selectedDate);

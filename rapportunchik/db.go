@@ -48,6 +48,46 @@ func InitDB() (*Database, error) {
 	}
 	DB = d
 
+	// Ensure compound unique index on { profileId: 1, date: 1 }
+	_, _ = d.workLogs.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "profileId", Value: 1},
+			{Key: "date", Value: 1},
+		},
+		Options: options.Index().SetUnique(true),
+	})
+
+	// Migrate any legacy logs without profileId to "default"
+	legacyCursor, err := d.workLogs.Find(ctx, bson.M{
+		"$or": []bson.M{
+			{"profileId": bson.M{"$exists": false}},
+			{"profileId": ""},
+		},
+	})
+	if err == nil {
+		var legacyDocs []bson.M
+		if err := legacyCursor.All(ctx, &legacyDocs); err == nil {
+			for _, doc := range legacyDocs {
+				dateVal, _ := doc["date"].(string)
+				if dateVal == "" {
+					dateVal, _ = doc["_id"].(string)
+				}
+				if dateVal != "" {
+					newID := fmt.Sprintf("default_%s", dateVal)
+					oldID, _ := doc["_id"].(string)
+					doc["_id"] = newID
+					doc["profileId"] = "default"
+					doc["date"] = dateVal
+					_, _ = d.workLogs.ReplaceOne(ctx, bson.M{"_id": newID}, doc, options.Replace().SetUpsert(true))
+					if oldID != "" && oldID != newID {
+						_, _ = d.workLogs.DeleteOne(ctx, bson.M{"_id": oldID})
+					}
+				}
+			}
+		}
+		legacyCursor.Close(ctx)
+	}
+
 	// Ensure default profile exists
 	_, err = d.GetProfile()
 	if err != nil {
@@ -302,9 +342,30 @@ func (d *Database) GetDayLog(dateStr string) (*WorkDayLog, error) {
 		return nil, fmt.Errorf("invalid date format %s: %w", dateStr, err)
 	}
 
+	profile, err := d.GetProfile()
+	if err != nil {
+		return nil, err
+	}
+
+	docID := fmt.Sprintf("%s_%s", profile.ID, dateStr)
 	var logEntry WorkDayLog
-	err = d.workLogs.FindOne(ctx, bson.M{"_id": dateStr}).Decode(&logEntry)
+	filter := bson.M{
+		"$or": []bson.M{
+			{"_id": docID},
+			{"profileId": profile.ID, "date": dateStr},
+		},
+	}
+	err = d.workLogs.FindOne(ctx, filter).Decode(&logEntry)
 	if err == nil {
+		if logEntry.ID == "" {
+			logEntry.ID = docID
+		}
+		if logEntry.ProfileID == "" {
+			logEntry.ProfileID = profile.ID
+		}
+		if logEntry.Date == "" {
+			logEntry.Date = dateStr
+		}
 		return &logEntry, nil
 	}
 
@@ -313,11 +374,6 @@ func (d *Database) GetDayLog(dateStr string) (*WorkDayLog, error) {
 	}
 
 	// Pre-compile from profile defaults
-	profile, err := d.GetProfile()
-	if err != nil {
-		return nil, err
-	}
-
 	weekdayKey := fmt.Sprint(int(t.Weekday()))
 	preset, ok := profile.WeekdayPresets[weekdayKey]
 	if !ok {
@@ -325,6 +381,8 @@ func (d *Database) GetDayLog(dateStr string) (*WorkDayLog, error) {
 	}
 
 	precompiled := WorkDayLog{
+		ID:             docID,
+		ProfileID:      profile.ID,
 		Date:           dateStr,
 		Year:           t.Year(),
 		Month:          int(t.Month()),
@@ -349,6 +407,18 @@ func (d *Database) SaveDayLog(logEntry WorkDayLog) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	profile, err := d.GetProfile()
+	if err != nil {
+		return err
+	}
+
+	if logEntry.ProfileID == "" {
+		logEntry.ProfileID = profile.ID
+	}
+	if logEntry.ID == "" {
+		logEntry.ID = fmt.Sprintf("%s_%s", logEntry.ProfileID, logEntry.Date)
+	}
+
 	t, err := time.Parse("2006-01-02", logEntry.Date)
 	if err == nil {
 		logEntry.Year = t.Year()
@@ -357,7 +427,7 @@ func (d *Database) SaveDayLog(logEntry WorkDayLog) error {
 	}
 	logEntry.UpdatedAt = time.Now().Format(time.RFC3339)
 
-	_, err = d.workLogs.ReplaceOne(ctx, bson.M{"_id": logEntry.Date}, logEntry, options.Replace().SetUpsert(true))
+	_, err = d.workLogs.ReplaceOne(ctx, bson.M{"_id": logEntry.ID}, logEntry, options.Replace().SetUpsert(true))
 	if err != nil {
 		return fmt.Errorf("failed to save day log: %w", err)
 	}
@@ -368,9 +438,15 @@ func (d *Database) GetMonthLogs(year int, month int) ([]WorkDayLog, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	profile, err := d.GetProfile()
+	if err != nil {
+		return nil, err
+	}
+
 	filter := bson.M{
-		"year":  year,
-		"month": month,
+		"profileId": profile.ID,
+		"year":      year,
+		"month":     month,
 	}
 
 	cursor, err := d.workLogs.Find(ctx, filter)
@@ -504,7 +580,8 @@ func (d *Database) GetOverallStats() (*OverallStats, error) {
 	}
 
 	filter := bson.M{
-		"isWorked": true,
+		"profileId": profile.ID,
+		"isWorked":  true,
 	}
 	cursor, err := d.workLogs.Find(ctx, filter)
 	if err != nil {

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func TestBackendFlow(t *testing.T) {
@@ -12,6 +15,7 @@ func TestBackendFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to initialize database: %v", err)
 	}
+	_ = db.SetActiveProfile("default")
 
 	// 2. Test GetProfile and verify Wednesday schedule & default settings
 	profile, err := db.GetProfile()
@@ -34,6 +38,11 @@ func TestBackendFlow(t *testing.T) {
 	}
 
 	// 2b. Test Multi-Profile: Save secondary profile and switch active profile
+	testCtx, testCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer testCancel()
+	_, _ = db.workLogs.DeleteMany(testCtx, bson.M{"profileId": "profile_test_client_b"})
+	_, _ = db.profiles.DeleteOne(testCtx, bson.M{"_id": "profile_test_client_b"})
+
 	profileB := DefaultProfile()
 	profileB.ID = "profile_test_client_b"
 	profileB.ClientCompanyName = "Client Bravo SRL"
@@ -128,6 +137,75 @@ func TestBackendFlow(t *testing.T) {
 	}
 	if stats.TotalMoneyEarned < 160.0 {
 		t.Errorf("Expected total money earned >= 160, got %f", stats.TotalMoneyEarned)
+	}
+
+	// 5b. Test Multi-Profile Data Isolation
+	// Switch to profile_test_client_b
+	err = db.SetActiveProfile("profile_test_client_b")
+	if err != nil {
+		t.Fatalf("Failed to switch to profile B: %v", err)
+	}
+
+	// Initially, profile B should have 0 worked days and an unworked default log for testDate
+	bLog, err := db.GetDayLog(testDate)
+	if err != nil {
+		t.Fatalf("Failed to get day log for profile B: %v", err)
+	}
+	if bLog.IsWorked {
+		t.Errorf("Expected profile B day log to be unworked initially, got isWorked=true")
+	}
+
+	bSummary, err := db.GetMonthSummary(2026, 10)
+	if err != nil {
+		t.Fatalf("Failed to get month summary for profile B: %v", err)
+	}
+	if bSummary.WorkedDays != 0 {
+		t.Errorf("Expected profile B to have 0 worked days, got %d", bSummary.WorkedDays)
+	}
+
+	bStats, err := db.GetOverallStats()
+	if err != nil {
+		t.Fatalf("Failed to get overall stats for profile B: %v", err)
+	}
+	if bStats.TotalDaysWorked != 0 {
+		t.Errorf("Expected profile B to have 0 total days worked, got %d", bStats.TotalDaysWorked)
+	}
+
+	// Now log work for profile B on the same date
+	bLogEntry := WorkDayLog{
+		Date:         testDate,
+		IsWorkingDay: true,
+		IsWorked:     true,
+		TotalHours:   5.0,
+		Objective:    "BRAVO-101",
+	}
+	err = db.SaveDayLog(bLogEntry)
+	if err != nil {
+		t.Fatalf("Failed to save day log for profile B: %v", err)
+	}
+
+	bSummaryAfter, err := db.GetMonthSummary(2026, 10)
+	if err != nil {
+		t.Fatalf("Failed to get month summary for profile B after save: %v", err)
+	}
+	if bSummaryAfter.WorkedDays != 1 {
+		t.Errorf("Expected profile B to have 1 worked day, got %d", bSummaryAfter.WorkedDays)
+	}
+	if bSummaryAfter.CurrentMonthlyRevenue != 220.0 {
+		t.Errorf("Expected profile B revenue to be 220.0, got %f", bSummaryAfter.CurrentMonthlyRevenue)
+	}
+
+	// Switch back to default and verify default log is completely unchanged
+	err = db.SetActiveProfile("default")
+	if err != nil {
+		t.Fatalf("Failed to switch back to default profile: %v", err)
+	}
+	defaultLogAfter, err := db.GetDayLog(testDate)
+	if err != nil {
+		t.Fatalf("Failed to get default day log after switch: %v", err)
+	}
+	if defaultLogAfter.Objective != "TEST-101" || defaultLogAfter.TotalHours != 7.5 {
+		t.Errorf("Default log was corrupted by profile B: %+v", defaultLogAfter)
 	}
 
 	// 6. Test PDF Generation (Italian, English, and Russian)

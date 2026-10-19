@@ -6,7 +6,7 @@ export const ru: TranslationSchema = {
     profileSelectorAria: 'Выберите профиль заказчика',
     profileModalTitle: 'Профили заказчиков',
     profileModalDesc: 'Выберите активного заказчика для просмотра табеля или добавьте нового:',
-    addNewProfileBtn: '+ Добавить нового заказчика',
+    addNewProfileBtn: 'Добавить нового заказчика',
     activeProfileBadge: 'Активен',
     dailyRateBadge: (rate: number) => `€ ${rate}/день`,
     timesheet: 'Табель',

@@ -29,7 +29,9 @@ type Profile struct {
 }
 
 type WorkDayLog struct {
-	Date           string  `bson:"_id" json:"date"` // YYYY-MM-DD
+	ID             string  `bson:"_id" json:"id"`
+	ProfileID      string  `bson:"profileId" json:"profileId"`
+	Date           string  `bson:"date" json:"date"` // YYYY-MM-DD
 	Year           int     `bson:"year" json:"year"`
 	Month          int     `bson:"month" json:"month"`
 	Day            int     `bson:"day" json:"day"`
