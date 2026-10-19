@@ -1,0 +1,93 @@
+# ==============================================================================
+# Rapportunchik — Comprehensive Git Ignore Rules
+# ==============================================================================
+
+# macOS & OS-specific Metadata
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDEs & Editor Configurations
+.idea/
+*.iml
+*.iws
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.directory
+*.patch
+
+# Build Outputs, Executables & Installers
+bin/
+**/bin/
+*.app/
+*.dev.app/
+*.dmg
+*.pkg
+*.exe
+*.dll
+*.so
+*.dylib
+*.iso
+*.msix
+*.deb
+*.rpm
+*.AppImage
+
+# Taskfile & Wails3 Temporary State
+.task/
+**/.task/
+.wails-provider-checked
+**/build/linux/appimage/build
+**/build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
+
+# Mobile Generated Overlays (Per-machine)
+**/build/ios/xcode/overlay.json
+**/build/ios/xcode/gen/
+**/build/android/overlay.json
+**/build/android/gen/
+
+# Frontend (Bun / Node / Vite / Svelte)
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.svelte-kit/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Go Artifacts & Testing
+*.test
+*.out
+pprof/
+
+# Database, Local Logs & Generated Data
+*.log
+mongo-data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment Files & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Generated User PDFs & Reports (exclude test/sample outputs)
+*.pdf
+!docs/**/*.pdf

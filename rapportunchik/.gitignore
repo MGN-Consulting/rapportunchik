@@ -1,0 +1,36 @@
+# ==============================================================================
+# Rapportunchik Submodule / Project Git Ignore
+# ==============================================================================
+
+# OS & Editor
+.DS_Store
+.idea/
+*.iml
+.vscode/
+
+# Build Outputs & Package Binaries
+bin
+*.app
+*.dev.app
+*.dmg
+*.pkg
+
+# Frontend Artifacts
+frontend/dist
+frontend/node_modules
+
+# Wails3 & Task State
+.task
+.wails-provider-checked
+build/linux/appimage/build
+build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
+
+# Mobile Generated Overlays
+build/ios/xcode/overlay.json
+build/ios/xcode/gen/
+build/android/overlay.json
+build/android/gen/
+
+# Logs & Generated PDFs
+*.log
+*.pdf

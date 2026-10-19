@@ -1,0 +1,15 @@
+{
+	"fixed": {
+		"file_version": "0.1.0"
+	},
+	"info": {
+		"0409": {
+			"ProductVersion": "0.1.0",
+			"CompanyName": "MGN Consulting",
+			"FileDescription": "A rapportunchik application",
+			"LegalCopyright": "© 2026, MGN Consulting",
+			"ProductName": "My Product",
+			"Comments": "This is a comment"
+		}
+	}
+}
