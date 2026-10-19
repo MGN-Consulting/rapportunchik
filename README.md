@@ -25,9 +25,7 @@
 
 ---
 
-<video src="./docs/video/introduction.mov" controls="controls" width="100%" style="max-width: 820px; border-radius: 14px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55); margin: 20px 0;">
-  Your browser does not support the video tag. <a href="./docs/video/introduction.mov">Watch introduction video</a>.
-</video>
+<img src="./docs/gif/introduction.gif" alt="Rapportunchik Introduction" width="100%" style="max-width: 850px; border-radius: 14px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55); margin: 20px 0;" />
 
 </div>
 
