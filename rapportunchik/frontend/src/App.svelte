@@ -6,6 +6,7 @@
   import StatsView from './lib/views/StatsView.svelte';
   import ProfileView from './lib/views/ProfileView.svelte';
   import Toast from './lib/components/Toast.svelte';
+  import UnsavedChangesModal from './lib/components/UnsavedChangesModal.svelte';
 
   onMount(() => {
     appState.init();
@@ -26,6 +27,7 @@
   </main>
 
   <Toast />
+  <UnsavedChangesModal />
 </div>
 
 <style>

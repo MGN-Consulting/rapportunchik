@@ -3,12 +3,19 @@ import type { TranslationSchema } from './types';
 export const it: TranslationSchema = {
   nav: {
     brandSubtitle: 'Collaborazione P.IVA',
+    profileSelectorAria: 'Seleziona Profilo Committente',
     timesheet: 'Rapportino',
     stats: 'Statistiche',
     profile: 'Impostazioni',
     statusSaving: 'Salvataggio...',
     statusSaved: 'Salvato su MongoDB',
     statusError: 'Errore DB'
+  },
+  unsavedModal: {
+    title: 'Modifiche non salvate',
+    desc: 'Hai delle modifiche non salvate nelle impostazioni del profilo. Vuoi abbandonare la pagina e perdere le modifiche, oppure restare per salvarle?',
+    stayBtn: 'Resta sulla pagina',
+    discardBtn: 'Abbandona modifiche'
   },
   timeline: {
     weekdaysShort: ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'],

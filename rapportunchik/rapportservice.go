@@ -28,6 +28,13 @@ func (s *RapportService) SaveProfile(p Profile) error {
 	return DB.SaveProfile(p)
 }
 
+func (s *RapportService) GetAllProfiles() ([]Profile, error) {
+	if DB == nil {
+		return nil, fmt.Errorf("database not initialized")
+	}
+	return DB.GetAllProfiles()
+}
+
 func (s *RapportService) GetDayLog(dateStr string) (*WorkDayLog, error) {
 	if DB == nil {
 		return nil, fmt.Errorf("database not initialized")

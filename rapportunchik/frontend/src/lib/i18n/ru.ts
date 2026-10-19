@@ -3,12 +3,19 @@ import type { TranslationSchema } from './types';
 export const ru: TranslationSchema = {
   nav: {
     brandSubtitle: 'Табель учета времени',
+    profileSelectorAria: 'Выберите профиль заказчика',
     timesheet: 'Табель',
     stats: 'Статистика',
     profile: 'Настройки',
     statusSaving: 'Сохранение...',
     statusSaved: 'Сохранено в MongoDB',
     statusError: 'Ошибка БД'
+  },
+  unsavedModal: {
+    title: 'Несохраненные изменения',
+    desc: 'В настройках профиля есть несохраненные изменения. Вы хотите покинуть страницу и сбросить их, или остаться, чтобы сохранить?',
+    stayBtn: 'Остаться на странице',
+    discardBtn: 'Сбросить изменения'
   },
   timeline: {
     weekdaysShort: ['ВОС', 'ПОН', 'ВТО', 'СРЕ', 'ЧЕТ', 'ПЯТ', 'СУБ'],

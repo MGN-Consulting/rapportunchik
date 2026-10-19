@@ -3,12 +3,19 @@ import type { TranslationSchema } from './types';
 export const en: TranslationSchema = {
   nav: {
     brandSubtitle: 'Contractor Timesheet',
+    profileSelectorAria: 'Select Client Profile',
     timesheet: 'Timesheet',
     stats: 'Statistics',
     profile: 'Settings',
     statusSaving: 'Saving...',
     statusSaved: 'Saved to MongoDB',
     statusError: 'DB Error'
+  },
+  unsavedModal: {
+    title: 'Unsaved Changes',
+    desc: 'You have unsaved changes in your profile settings. Do you want to leave this page and discard your changes, or stay to save them?',
+    stayBtn: 'Stay on Page',
+    discardBtn: 'Discard Changes'
   },
   timeline: {
     weekdaysShort: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],

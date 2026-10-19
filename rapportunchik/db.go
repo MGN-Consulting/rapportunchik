@@ -197,6 +197,39 @@ func (d *Database) SaveProfile(p Profile) error {
 	return nil
 }
 
+func (d *Database) GetAllProfiles() ([]Profile, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := d.profiles.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to list profiles: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	var list []Profile
+	if err := cursor.All(ctx, &list); err != nil {
+		return nil, fmt.Errorf("failed to decode profiles: %w", err)
+	}
+
+	if len(list) == 0 {
+		def := DefaultProfile()
+		_, insertErr := d.profiles.InsertOne(ctx, def)
+		if insertErr != nil {
+			return nil, fmt.Errorf("failed to insert default profile: %w", insertErr)
+		}
+		list = append(list, def)
+	}
+
+	for i := range list {
+		if list[i].Language == "" {
+			list[i].Language = "it"
+		}
+	}
+
+	return list, nil
+}
+
 func (d *Database) GetDayLog(dateStr string) (*WorkDayLog, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

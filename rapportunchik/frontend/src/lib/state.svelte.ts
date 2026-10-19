@@ -15,12 +15,17 @@ export class AppState {
   selectedMonth = $state<number>(10);
 
   profile = $state<Profile | null>(null);
+  allProfiles = $state<Profile[]>([]);
   monthSummary = $state<MonthSummary | null>(null);
   overallStats = $state<OverallStats | null>(null);
   availableMonths = $state<MonthOption[]>([]);
   currentDayLog = $state<WorkDayLog | null>(null);
 
   isMonthModalOpen = $state<boolean>(false);
+  isUnsavedModalOpen = $state<boolean>(false);
+  hasUnsavedProfileChanges = $state<boolean>(false);
+  pendingTab = $state<'main' | 'stats' | 'profile' | null>(null);
+  onDiscardProfileCallback: (() => void) | null = null;
   isPrinting = $state<boolean>(false);
   saveStatus = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
   toast = $state<{ message: string; type: 'info' | 'success' | 'error' } | null>(null);
@@ -32,6 +37,7 @@ export class AppState {
     i18n.init();
     try {
       await this.loadProfile();
+      await this.loadAllProfiles();
       await this.loadAvailableMonths();
       await this.loadMonthSummary(this.selectedYear, this.selectedMonth);
       await this.loadDay(this.selectedDate);
@@ -53,6 +59,17 @@ export class AppState {
       }
     } catch (err) {
       console.error('Failed to load profile:', err);
+    }
+  }
+
+  async loadAllProfiles() {
+    try {
+      const list = await RapportService.GetAllProfiles();
+      if (list && list.length > 0) {
+        this.allProfiles = list;
+      }
+    } catch (err) {
+      console.error('Failed to load all profiles:', err);
     }
   }
 
@@ -187,6 +204,8 @@ export class AppState {
       }
       await RapportService.SaveProfile(p);
       this.profile = p;
+      this.hasUnsavedProfileChanges = false;
+      await this.loadAllProfiles();
       await this.loadMonthSummary(this.selectedYear, this.selectedMonth);
       await this.loadOverallStats();
       await this.loadDay(this.selectedDate);
@@ -194,6 +213,46 @@ export class AppState {
     } catch (err) {
       console.error('Failed to save profile:', err);
       this.showToast(i18n.t.toasts.profileError, 'error');
+    }
+  }
+
+  requestTabChange(targetTab: 'main' | 'stats' | 'profile') {
+    if (this.activeTab === targetTab) return;
+    if (this.activeTab === 'profile' && this.hasUnsavedProfileChanges) {
+      this.pendingTab = targetTab;
+      this.isUnsavedModalOpen = true;
+      return;
+    }
+    this.activeTab = targetTab;
+  }
+
+  confirmDiscardAndNavigate() {
+    if (this.onDiscardProfileCallback) {
+      this.onDiscardProfileCallback();
+    }
+    this.hasUnsavedProfileChanges = false;
+    this.isUnsavedModalOpen = false;
+    if (this.pendingTab) {
+      this.activeTab = this.pendingTab;
+      this.pendingTab = null;
+    }
+  }
+
+  cancelDiscard() {
+    this.pendingTab = null;
+    this.isUnsavedModalOpen = false;
+  }
+
+  async switchProfile(id: string) {
+    const found = this.allProfiles.find((p) => p.id === id);
+    if (found) {
+      this.profile = found;
+      if (found.language) {
+        i18n.setLocale(found.language as Locale);
+      }
+      await this.loadMonthSummary(this.selectedYear, this.selectedMonth);
+      await this.loadOverallStats();
+      await this.loadDay(this.selectedDate);
     }
   }
 

@@ -62,9 +62,35 @@
     (form.language as Locale) || i18n.currentLocale || 'it'
   );
 
-  function selectLanguage(loc: Locale) {
+  function getComparableProfile(p: Profile | null) {
+    if (!p) return '';
+    const { language, ...rest } = p;
+    return JSON.stringify(rest);
+  }
+
+  let isDirty = $derived(
+    getComparableProfile(form) !== getComparableProfile(appState.profile)
+  );
+
+  $effect(() => {
+    appState.hasUnsavedProfileChanges = isDirty;
+  });
+
+  $effect(() => {
+    appState.onDiscardProfileCallback = () => {
+      if (appState.profile) {
+        form = JSON.parse(JSON.stringify(appState.profile));
+      }
+    };
+    return () => {
+      appState.onDiscardProfileCallback = null;
+    };
+  });
+
+  async function selectLanguage(loc: Locale) {
     form.language = loc;
     i18n.setLocale(loc);
+    await handleSave();
   }
 
   function calcHours(mStart: string, mEnd: string, aStart: string, aEnd: string): number {
@@ -94,7 +120,12 @@
       <p>{i18n.t.profile.headerSubtitle}</p>
     </div>
 
-    <button class="save-main-btn" onclick={handleSave}>
+    <button
+      class="save-main-btn"
+      class:inactive={!isDirty}
+      disabled={!isDirty}
+      onclick={handleSave}
+    >
       <Save size={16} />
       <span>{i18n.t.profile.saveBtn}</span>
     </button>
@@ -475,13 +506,26 @@
     font-size: 13px;
     font-weight: 700;
     box-shadow: 0 4px 14px rgba(51, 82, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .save-main-btn:hover {
+  .save-main-btn:hover:not(:disabled) {
     background: var(--accent-primary);
     color: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(51, 82, 255, 0.45);
+  }
+
+  .save-main-btn.inactive,
+  .save-main-btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    background: rgba(21, 26, 53, 0.5);
+    color: var(--text-muted);
+    border-color: rgba(147, 168, 255, 0.1);
+    box-shadow: none;
+    transform: none;
   }
 
   .cards-grid {

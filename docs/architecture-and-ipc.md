@@ -81,10 +81,16 @@ Retrieves collaborator fiscal data, client metadata, contract parameters, and we
 - **Return Type**: `models.Profile` (JSON-serialized struct)
 - **Error Handling**: Initializes and seeds default MongoDB document if database is unseeded.
 
+#### `GetAllProfiles(): Promise<models.Profile[]>`
+Retrieves all configured profiles stored in the MongoDB `profiles` collection for the top navigation bar profile switch dropdown.
+- **Backend Handler**: `RapportService.GetAllProfiles()`
+- **Return Type**: `models.Profile[]`
+- **Fallback**: Returns the default profile (*MGN Consulting*) if unseeded.
+
 #### `SaveProfile(profile: models.Profile): Promise<void>`
 Persists modified fiscal, contract, or schedule preset settings.
 - **Backend Handler**: `RapportService.SaveProfile(p models.Profile)`
-- **Behavior**: Upserts the singleton configuration record in the `profiles` collection.
+- **Behavior**: Upserts the configuration record in the `profiles` collection.
 
 #### `GetWorkDayLog(dateStr: string): Promise<models.WorkDayLog>`
 Fetches the log for a specific date (`YYYY-MM-DD`).
@@ -130,19 +136,25 @@ State management in `src/lib/state.svelte.ts` leverages modern **Svelte 5 Runes*
 
 ```typescript
 // Core reactive state container
-export const appState = $state({
-  activeView: 'main' as 'main' | 'stats' | 'profile',
-  selectedDate: new Date().toISOString().split('T')[0],
-  currentLog: null as WorkDayLog | null,
-  profile: null as Profile | null,
-  monthSummary: null as MonthSummary | null,
-  overallStats: null as OverallStats | null,
-  isSaving: false,
-  saveStatus: 'Pronto'
-});
+export class AppState {
+  activeTab = $state<'main' | 'stats' | 'profile'>('main');
+  selectedDate = $state<string>('2026-10-19');
+  profile = $state<Profile | null>(null);
+  allProfiles = $state<Profile[]>([]);
+  hasUnsavedProfileChanges = $state<boolean>(false);
+  isUnsavedModalOpen = $state<boolean>(false);
+  saveStatus = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  ...
+}
 ```
 
-### 4.1 Unidirectional Event Loop
+### 4.1 Unsaved Changes Navigation Guard
+1. **Dirty Checking**: In `ProfileView`, a derived rune computes whether non-language fields differ from `appState.profile`.
+2. **Button Activation**: The "Salva Modifiche" button is disabled by default; it activates only when modifications exist.
+3. **Language Auto-Save**: Changing the active locale immediately persists the profile to MongoDB via `saveProfile()`.
+4. **Tab Interception**: Clicking any navigation tab (`Rapportino` or `Statistiche`) while on the Profile tab with unsaved edits invokes `requestTabChange()`, blocking navigation and displaying `<UnsavedChangesModal />` until the user confirms or cancels.
+
+### 4.2 Unidirectional Event Loop
 1. **User Interaction**: Day selected on Timeline ribbon or shift hours modified.
 2. **Local Mutation**: `$state` values update immediately for zero input lag.
 3. **Debounced Persistence**: Background timer triggers `RapportService.SetWorkDayLog(log)`.

@@ -99,12 +99,14 @@ Pre-configured for standard hybrid schedules with automatic morning/afternoon sp
 - Directly opens in macOS **Preview** and saves to `~/Documents/Rapportini/Rapportino_YYYY_MM.pdf`.
 
 ### ⚙️ 5. Customizable Profile & Preset Settings (`Profile Page`)
-- Manage client details, fiscal codes, and billing information.
-- Configure daily rate (e.g., `160 €`), overall target milestone (`20.000 €`), and contract start date.
-- Customize weekly schedules and default locations for every day of the week.
+- **Interactive Client Profile Switcher**: Switch between client profiles directly from the top navigation bar via a stylized dropdown displaying the `"Ragione Sociale Committente"` (e.g., *MGN Consulting*).
+- **Smart Dirty-State & Navigation Guard**: The "Salva Modifiche" button remains disabled/inactive by default, activating only when non-language fields are edited. An interactive modal popup intercepts navigation attempts if unsaved modifications are pending.
+- **Instant Language Auto-Save**: Locale changes (Italian 🇮🇹, English 🇬🇧, Russian 🇷🇺) persist immediately to MongoDB in real time without leaving the settings form dirty.
+- **Fiscal & Preset Configuration**: Manage client details, contractor credentials, daily billing rates, revenue targets, and weekday work presets.
 
-### 🎨 6. Modern Dark Theme Aesthetics
-- Crafted with electric indigo and deep slate color tokens:
+### 🎨 6. Modern Dark Theme Aesthetics & Centered Navigation
+- **Centered Navigation Ribbon**: Main menu tabs (*Rapportino*, *Statistiche*, *Impostazioni*) are centered in the application titlebar.
+- **Crafted Dark Palette**:
   - Primary Indigo Accent: `hsl(234, 100%, 60%)`
   - Deep Navy Slate Surface: `hsl(234, 54%, 20%)`
   - Ice-Blue Glow: `hsl(234, 100%, 87%)`

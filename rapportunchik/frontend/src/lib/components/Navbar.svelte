@@ -1,23 +1,50 @@
 <script lang="ts">
   import { appState } from '../state.svelte';
   import { i18n } from '../i18n';
-  import { Calendar, BarChart3, Settings, CheckCircle2, Loader2, AlertCircle } from 'lucide-svelte';
+  import {
+    Calendar,
+    BarChart3,
+    Settings,
+    CheckCircle2,
+    Loader2,
+    AlertCircle,
+    Building2,
+    ChevronDown
+  } from 'lucide-svelte';
 </script>
 
 <header class="navbar window-drag-region">
-  <div class="brand">
-    <div class="logo-mark">
-      <div class="logo-circle"></div>
-      <span class="logo-text">Rapportunchik</span>
+  <div class="profile-switch-zone no-drag">
+    <div class="profile-select-wrapper">
+      <Building2 size={15} class="client-icon" />
+      <select
+        class="profile-select"
+        value={appState.profile?.id || 'default'}
+        onchange={(e) => appState.switchProfile(e.currentTarget.value)}
+        aria-label={i18n.t.nav.profileSelectorAria}
+        title={appState.profile?.clientCompanyName || 'Committente'}
+      >
+        {#if appState.allProfiles && appState.allProfiles.length > 0}
+          {#each appState.allProfiles as p}
+            <option value={p.id}>
+              {p.clientCompanyName || 'Committente'}
+            </option>
+          {/each}
+        {:else}
+          <option value="default">
+            {appState.profile?.clientCompanyName || 'MGN Consulting'}
+          </option>
+        {/if}
+      </select>
+      <ChevronDown size={13} class="select-chevron" />
     </div>
-    <span class="subtitle">{i18n.t.nav.brandSubtitle}</span>
   </div>
 
   <nav class="nav-tabs no-drag">
     <button
       class="tab-btn"
       class:active={appState.activeTab === 'main'}
-      onclick={() => (appState.activeTab = 'main')}
+      onclick={() => appState.requestTabChange('main')}
     >
       <Calendar size={15} />
       <span>{i18n.t.nav.timesheet}</span>
@@ -26,7 +53,7 @@
     <button
       class="tab-btn"
       class:active={appState.activeTab === 'stats'}
-      onclick={() => (appState.activeTab = 'stats')}
+      onclick={() => appState.requestTabChange('stats')}
     >
       <BarChart3 size={15} />
       <span>{i18n.t.nav.stats}</span>
@@ -35,7 +62,7 @@
     <button
       class="tab-btn"
       class:active={appState.activeTab === 'profile'}
-      onclick={() => (appState.activeTab = 'profile')}
+      onclick={() => appState.requestTabChange('profile')}
     >
       <Settings size={15} />
       <span>{i18n.t.nav.profile}</span>
@@ -64,6 +91,7 @@
 
 <style>
   .navbar {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -76,49 +104,78 @@
     z-index: 100;
   }
 
-  .brand {
+  .profile-switch-zone {
     display: flex;
     align-items: center;
-    gap: 10px;
+    z-index: 2;
   }
 
-  .logo-mark {
+  .profile-select-wrapper {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 8px;
+    background: rgba(21, 26, 53, 0.7);
+    border: 1px solid rgba(147, 168, 255, 0.15);
+    border-radius: 8px;
+    padding: 4px 10px 4px 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 260px;
   }
 
-  .logo-circle {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--accent-primary);
-    box-shadow: 0 0 10px var(--accent-primary);
+  .profile-select-wrapper:hover {
+    background: rgba(21, 26, 53, 0.95);
+    border-color: rgba(147, 168, 255, 0.35);
+    box-shadow: 0 0 12px rgba(51, 82, 255, 0.2);
   }
 
-  .logo-text {
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: -0.3px;
+  :global(.client-icon) {
+    color: var(--accent-highlight);
+    margin-right: 7px;
+    flex-shrink: 0;
+  }
+
+  .profile-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: none;
     color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding-right: 18px;
+    outline: none;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 190px;
   }
 
-  .subtitle {
-    font-size: 11px;
+  .profile-select option {
+    background: #0e1224;
+    color: var(--text-primary);
+    padding: 8px;
+  }
+
+  :global(.select-chevron) {
+    position: absolute;
+    right: 8px;
+    pointer-events: none;
     color: var(--text-muted);
-    padding: 2px 7px;
-    background: rgba(147, 168, 255, 0.08);
-    border-radius: 6px;
-    font-weight: 500;
   }
 
   .nav-tabs {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     gap: 4px;
     background: rgba(8, 10, 20, 0.6);
     padding: 3px;
     border-radius: 9px;
     border: 1px solid var(--border-subtle);
+    z-index: 2;
   }
 
   .tab-btn {

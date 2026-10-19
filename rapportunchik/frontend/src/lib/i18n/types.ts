@@ -3,12 +3,19 @@ export type Locale = 'it' | 'en' | 'ru';
 export interface TranslationSchema {
   nav: {
     brandSubtitle: string;
+    profileSelectorAria: string;
     timesheet: string;
     stats: string;
     profile: string;
     statusSaving: string;
     statusSaved: string;
     statusError: string;
+  };
+  unsavedModal: {
+    title: string;
+    desc: string;
+    stayBtn: string;
+    discardBtn: string;
   };
   timeline: {
     weekdaysShort: string[]; // 7 elements starting Sunday (0) to Saturday (6)
