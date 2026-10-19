@@ -25,6 +25,10 @@
 
 ---
 
+<video src="./docs/video/introduction.mov" controls="controls" width="100%" style="max-width: 820px; border-radius: 14px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55); margin: 20px 0;">
+  Your browser does not support the video tag. <a href="./docs/video/introduction.mov">Watch introduction video</a>.
+</video>
+
 </div>
 
 ## 🌟 Overview
@@ -144,12 +148,13 @@ flowchart TD
 
 ## 📚 Documentation & Contributing
 
-> [!TIP]
-> The [`docs/`](./docs) directory will be filled out soon with comprehensive guides, including:
-> - Full Application Architecture & IPC specifications
-> - Developer Guidelines & Contributing Code of Conduct
-> - Cross-platform build recipes (Windows, Android, iOS, Linux)
-> - MongoDB Schema & Data Export recipes
+Explore our in-depth technical guides and contributor resources in the [`docs/`](./docs) directory:
+
+- 🏗️ **[Full Architecture & IPC Specifications](./docs/architecture-and-ipc.md)**: Deep dive into the native desktop architecture, Wails V3 IPC bridge, Svelte 5 Runes state flow, and PDF compilation.
+- 🤝 **[Developer Guidelines & Code of Conduct](./docs/contributing.md)**: Branching strategy, Conventional Commits, local setup, Go & Svelte standards, and community pledge.
+- 📦 **[Cross-Platform Build Recipes](./docs/cross-platform-builds.md)**: Exhaustive build instructions for macOS (DMG/.app), Windows (NSIS/MSIX), Android (APK/AAB), iOS, and Linux.
+- 🗄️ **[MongoDB Schema & Data Export Recipes](./docs/database-schema-and-export.md)**: Complete collection schemas, indexes, backup restoration, and JSON/CSV accounting exports.
+- 📖 **[Documentation Hub & Visual UI Tour](./docs/README.md)**: Interactive overview with screenshots of all views.
 
 We welcome community feedback, feature discussions, and bug reports through [GitHub Issues](https://github.com/MyHouseIsBig/rapportini/issues)!
 
@@ -250,7 +255,7 @@ This software is released under the **MD di MGNP Source-Available & Commercial R
 
 <div align="center">
 
-**Crafted with precision by MD di MGNP**
+**Crafted with precision by Maxim G. N. Palotti**
 
 ⭐ **Star Rapportunchik on GitHub if you enjoy modern desktop engineering!** ⭐
 
