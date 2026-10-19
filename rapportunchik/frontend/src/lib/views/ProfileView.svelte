@@ -22,7 +22,7 @@
   );
 
   $effect(() => {
-    if (appState.profile && !form.id) {
+    if (appState.profile && (!form.id || form.id !== appState.profile.id)) {
       form = JSON.parse(JSON.stringify(appState.profile));
     }
   });
@@ -122,8 +122,8 @@
 
     <button
       class="save-main-btn"
-      class:inactive={!isDirty}
-      disabled={!isDirty}
+      class:inactive={!isDirty || !form.clientCompanyName?.trim()}
+      disabled={!isDirty || !form.clientCompanyName?.trim()}
       onclick={handleSave}
     >
       <Save size={16} />

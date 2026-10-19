@@ -90,7 +90,12 @@ Retrieves all configured profiles stored in the MongoDB `profiles` collection fo
 #### `SaveProfile(profile: models.Profile): Promise<void>`
 Persists modified fiscal, contract, or schedule preset settings.
 - **Backend Handler**: `RapportService.SaveProfile(p models.Profile)`
-- **Behavior**: Upserts the configuration record in the `profiles` collection.
+- **Behavior**: Upserts the configuration record in the `profiles` collection and sets it as the active profile.
+
+#### `SetActiveProfile(id: string): Promise<void>`
+Sets the specified profile ID as the active working profile in both memory and persistent MongoDB configuration (`settings` collection).
+- **Backend Handler**: `RapportService.SetActiveProfile(id string)`
+- **Behavior**: Updates active profile pointer; subsequent calculations (monthly summary, daily rates, PDF generator) immediately use this profile.
 
 #### `GetWorkDayLog(dateStr: string): Promise<models.WorkDayLog>`
 Fetches the log for a specific date (`YYYY-MM-DD`).
@@ -148,11 +153,12 @@ export class AppState {
 }
 ```
 
-### 4.1 Unsaved Changes Navigation Guard
-1. **Dirty Checking**: In `ProfileView`, a derived rune computes whether non-language fields differ from `appState.profile`.
-2. **Button Activation**: The "Salva Modifiche" button is disabled by default; it activates only when modifications exist.
-3. **Language Auto-Save**: Changing the active locale immediately persists the profile to MongoDB via `saveProfile()`.
-4. **Tab Interception**: Clicking any navigation tab (`Rapportino` or `Statistiche`) while on the Profile tab with unsaved edits invokes `requestTabChange()`, blocking navigation and displaying `<UnsavedChangesModal />` until the user confirms or cancels.
+### 4.1 Profile Selector Modal & Navigation Guard
+1. **Interactive Client Modal Popup**: Clicking the navbar profile pill opens `<ProfileSelectorModal />`. Users can switch between stored client profiles or choose "+ Aggiungi nuovo committente", which navigates directly to the Settings tab with a fresh pre-filled template.
+2. **Immutable State & Reference Cloning**: `appState.saveProfile()` and `loadProfile()` clone profile objects (`JSON.parse(JSON.stringify(p))`) to eliminate memory reference aliasing, ensuring that editing fields in `ProfileView` reliably triggers the reactive `isDirty` derived rune even after immediate language switches.
+3. **Dirty-State Button Activation**: The "Salva Modifiche" button remains disabled by default; it activates only when modifications exist and a client company name is entered.
+4. **Instant Language Auto-Save**: Changing the active locale immediately persists the profile to MongoDB via `saveProfile()`.
+5. **Tab & Profile Interception**: Navigating away from the Settings tab or switching profiles while unsaved edits exist invokes the navigation guard, presenting `<UnsavedChangesModal />` to let the user choose between staying or discarding edits. If discarding an unsaved new profile draft, the state safely reverts to the previous saved profile.
 
 ### 4.2 Unidirectional Event Loop
 1. **User Interaction**: Day selected on Timeline ribbon or shift hours modified.

@@ -22,9 +22,13 @@ export class AppState {
   currentDayLog = $state<WorkDayLog | null>(null);
 
   isMonthModalOpen = $state<boolean>(false);
+  isProfileModalOpen = $state<boolean>(false);
   isUnsavedModalOpen = $state<boolean>(false);
   hasUnsavedProfileChanges = $state<boolean>(false);
   pendingTab = $state<'main' | 'stats' | 'profile' | null>(null);
+  pendingProfileId = $state<string | null>(null);
+  pendingNewProfile = $state<boolean>(false);
+  previousSavedProfile: Profile | null = null;
   onDiscardProfileCallback: (() => void) | null = null;
   isPrinting = $state<boolean>(false);
   saveStatus = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -52,7 +56,8 @@ export class AppState {
     try {
       const p = await RapportService.GetProfile();
       if (p) {
-        this.profile = p;
+        this.profile = JSON.parse(JSON.stringify(p));
+        this.previousSavedProfile = JSON.parse(JSON.stringify(p));
         if (p.language) {
           i18n.init(p.language);
         }
@@ -202,8 +207,12 @@ export class AppState {
       if (p.language) {
         i18n.setLocale(p.language as Locale);
       }
+      if (!p.id) {
+        p.id = 'profile_' + Date.now();
+      }
       await RapportService.SaveProfile(p);
-      this.profile = p;
+      this.profile = JSON.parse(JSON.stringify(p));
+      this.previousSavedProfile = JSON.parse(JSON.stringify(p));
       this.hasUnsavedProfileChanges = false;
       await this.loadAllProfiles();
       await this.loadMonthSummary(this.selectedYear, this.selectedMonth);
@@ -223,15 +232,42 @@ export class AppState {
       this.isUnsavedModalOpen = true;
       return;
     }
+    // If navigating away from an unsaved new profile draft, revert back to previous saved profile
+    if (this.profile && !this.allProfiles.some((p) => p.id === this.profile?.id)) {
+      if (this.previousSavedProfile) {
+        this.profile = JSON.parse(JSON.stringify(this.previousSavedProfile));
+      }
+    }
     this.activeTab = targetTab;
   }
 
-  confirmDiscardAndNavigate() {
+  async confirmDiscardAndNavigate() {
     if (this.onDiscardProfileCallback) {
       this.onDiscardProfileCallback();
     }
     this.hasUnsavedProfileChanges = false;
     this.isUnsavedModalOpen = false;
+
+    // Check if we were editing an unsaved new profile draft
+    if (this.profile && !this.allProfiles.some((p) => p.id === this.profile?.id)) {
+      if (this.previousSavedProfile) {
+        this.profile = JSON.parse(JSON.stringify(this.previousSavedProfile));
+      }
+    }
+
+    if (this.pendingProfileId) {
+      const pid = this.pendingProfileId;
+      this.pendingProfileId = null;
+      await this.applySwitchProfile(pid);
+      return;
+    }
+
+    if (this.pendingNewProfile) {
+      this.pendingNewProfile = false;
+      this.prepareNewProfile();
+      return;
+    }
+
     if (this.pendingTab) {
       this.activeTab = this.pendingTab;
       this.pendingTab = null;
@@ -240,20 +276,79 @@ export class AppState {
 
   cancelDiscard() {
     this.pendingTab = null;
+    this.pendingProfileId = null;
+    this.pendingNewProfile = false;
     this.isUnsavedModalOpen = false;
   }
 
   async switchProfile(id: string) {
-    const found = this.allProfiles.find((p) => p.id === id);
-    if (found) {
-      this.profile = found;
-      if (found.language) {
-        i18n.setLocale(found.language as Locale);
-      }
+    if (this.profile?.id === id) return;
+    if (this.activeTab === 'profile' && this.hasUnsavedProfileChanges) {
+      this.pendingProfileId = id;
+      this.isUnsavedModalOpen = true;
+      return;
+    }
+    await this.applySwitchProfile(id);
+  }
+
+  async applySwitchProfile(id: string) {
+    try {
+      await RapportService.SetActiveProfile(id);
+      await this.loadProfile();
+      await this.loadAllProfiles();
       await this.loadMonthSummary(this.selectedYear, this.selectedMonth);
       await this.loadOverallStats();
       await this.loadDay(this.selectedDate);
+    } catch (err) {
+      console.error('Failed to switch profile:', err);
     }
+  }
+
+  startNewProfile() {
+    if (this.activeTab === 'profile' && this.hasUnsavedProfileChanges) {
+      this.pendingNewProfile = true;
+      this.isUnsavedModalOpen = true;
+      return;
+    }
+    this.prepareNewProfile();
+  }
+
+  prepareNewProfile() {
+    this.previousSavedProfile = this.profile ? JSON.parse(JSON.stringify(this.profile)) : null;
+    const newId = 'profile_' + Date.now();
+    const defaultPresets = this.profile?.weekdayPresets
+      ? JSON.parse(JSON.stringify(this.profile.weekdayPresets))
+      : {
+          '0': { isWorkingDay: false, workLocation: 'Smart-working', morningStart: '09:00', morningEnd: '14:00', afternoonStart: '14:30', afternoonEnd: '17:00', totalHours: 0.0 },
+          '1': { isWorkingDay: true, workLocation: 'In Sede', morningStart: '09:10', morningEnd: '14:00', afternoonStart: '14:30', afternoonEnd: '17:10', totalHours: 7.5 },
+          '2': { isWorkingDay: true, workLocation: 'Smart-working', morningStart: '09:00', morningEnd: '14:00', afternoonStart: '14:30', afternoonEnd: '17:00', totalHours: 7.5 },
+          '3': { isWorkingDay: true, workLocation: 'Smart-working', morningStart: '09:00', morningEnd: '14:00', afternoonStart: '14:30', afternoonEnd: '17:30', totalHours: 8.0 },
+          '4': { isWorkingDay: true, workLocation: 'In Sede', morningStart: '09:10', morningEnd: '14:00', afternoonStart: '14:30', afternoonEnd: '17:10', totalHours: 7.5 },
+          '5': { isWorkingDay: true, workLocation: 'Smart-working', morningStart: '09:00', morningEnd: '14:00', afternoonStart: '14:30', afternoonEnd: '17:00', totalHours: 7.5 },
+          '6': { isWorkingDay: false, workLocation: 'Smart-working', morningStart: '09:00', morningEnd: '14:00', afternoonStart: '14:30', afternoonEnd: '17:00', totalHours: 0.0 }
+        };
+
+    const newProfile: Profile = {
+      id: newId,
+      clientCompanyName: '',
+      clientAddress: '',
+      clientPIVA: '',
+      clientContact: '',
+      contractorName: this.profile?.contractorName || '',
+      contractorPIVA: this.profile?.contractorPIVA || '',
+      contractorCF: this.profile?.contractorCF || '',
+      contractorAddress: this.profile?.contractorAddress || '',
+      contractorIBAN: this.profile?.contractorIBAN || '',
+      firstDayOfWork: new Date().toISOString().split('T')[0],
+      dailyRate: this.profile?.dailyRate || 160.0,
+      revenueTarget: this.profile?.revenueTarget || 20000.0,
+      language: (this.profile?.language as Locale) || i18n.currentLocale || 'it',
+      weekdayPresets: defaultPresets
+    };
+
+    this.profile = newProfile;
+    this.hasUnsavedProfileChanges = false;
+    this.activeTab = 'profile';
   }
 
   async printMonthPDF() {

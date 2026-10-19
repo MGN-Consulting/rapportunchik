@@ -48,3 +48,7 @@ export function SaveDayLog(logEntry: $models.WorkDayLog): $CancellablePromise<vo
 export function SaveProfile(p: $models.Profile): $CancellablePromise<void> {
     return $Call.ByID(2615275797, p);
 }
+
+export function SetActiveProfile(id: string): $CancellablePromise<void> {
+    return $Call.ByID(3943721246, id);
+}

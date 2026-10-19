@@ -15,29 +15,18 @@
 
 <header class="navbar window-drag-region">
   <div class="profile-switch-zone no-drag">
-    <div class="profile-select-wrapper">
+    <button
+      class="profile-selector-btn"
+      onclick={() => (appState.isProfileModalOpen = true)}
+      aria-label={i18n.t.nav.profileSelectorAria}
+      title={appState.profile?.clientCompanyName || 'Committente'}
+    >
       <Building2 size={15} class="client-icon" />
-      <select
-        class="profile-select"
-        value={appState.profile?.id || 'default'}
-        onchange={(e) => appState.switchProfile(e.currentTarget.value)}
-        aria-label={i18n.t.nav.profileSelectorAria}
-        title={appState.profile?.clientCompanyName || 'Committente'}
-      >
-        {#if appState.allProfiles && appState.allProfiles.length > 0}
-          {#each appState.allProfiles as p}
-            <option value={p.id}>
-              {p.clientCompanyName || 'Committente'}
-            </option>
-          {/each}
-        {:else}
-          <option value="default">
-            {appState.profile?.clientCompanyName || 'MGN Consulting'}
-          </option>
-        {/if}
-      </select>
+      <span class="profile-name">
+        {appState.profile?.clientCompanyName || 'Committente'}
+      </span>
       <ChevronDown size={13} class="select-chevron" />
-    </div>
+    </button>
   </div>
 
   <nav class="nav-tabs no-drag">
@@ -110,19 +99,21 @@
     z-index: 2;
   }
 
-  .profile-select-wrapper {
+  .profile-selector-btn {
     position: relative;
     display: flex;
     align-items: center;
     background: rgba(21, 26, 53, 0.7);
     border: 1px solid rgba(147, 168, 255, 0.15);
     border-radius: 8px;
-    padding: 4px 10px 4px 8px;
+    padding: 6px 12px 6px 9px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     max-width: 260px;
+    cursor: pointer;
+    text-align: left;
   }
 
-  .profile-select-wrapper:hover {
+  .profile-selector-btn:hover {
     background: rgba(21, 26, 53, 0.95);
     border-color: rgba(147, 168, 255, 0.35);
     box-shadow: 0 0 12px rgba(51, 82, 255, 0.2);
@@ -134,35 +125,25 @@
     flex-shrink: 0;
   }
 
-  .profile-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-    border: none;
+  .profile-name {
     color: var(--text-primary);
-    font-family: inherit;
     font-size: 13px;
     font-weight: 600;
-    padding-right: 18px;
-    outline: none;
-    cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 190px;
-  }
-
-  .profile-select option {
-    background: #0e1224;
-    color: var(--text-primary);
-    padding: 8px;
+    max-width: 170px;
   }
 
   :global(.select-chevron) {
-    position: absolute;
-    right: 8px;
-    pointer-events: none;
+    margin-left: 8px;
     color: var(--text-muted);
+    transition: color 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .profile-selector-btn:hover :global(.select-chevron) {
+    color: var(--text-primary);
   }
 
   .nav-tabs {

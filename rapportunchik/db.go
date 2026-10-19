@@ -14,10 +14,12 @@ import (
 )
 
 type Database struct {
-	client   *mongo.Client
-	db       *mongo.Database
-	profiles *mongo.Collection
-	workLogs *mongo.Collection
+	client          *mongo.Client
+	db              *mongo.Database
+	profiles        *mongo.Collection
+	workLogs        *mongo.Collection
+	settings        *mongo.Collection
+	activeProfileID string
 }
 
 var DB *Database
@@ -42,6 +44,7 @@ func InitDB() (*Database, error) {
 		db:       db,
 		profiles: db.Collection("profile"),
 		workLogs: db.Collection("work_logs"),
+		settings: db.Collection("settings"),
 	}
 	DB = d
 
@@ -146,29 +149,36 @@ func DefaultProfile() Profile {
 	}
 }
 
-func (d *Database) GetProfile() (*Profile, error) {
+func (d *Database) SetActiveProfile(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	d.activeProfileID = id
+	_, err := d.settings.UpdateOne(ctx,
+		bson.M{"_id": "active_profile"},
+		bson.M{"$set": bson.M{"profileId": id}},
+		options.UpdateOne().SetUpsert(true),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to set active profile: %w", err)
+	}
+	return nil
+}
+
+func (d *Database) GetProfileByID(id string) (*Profile, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var profile Profile
-	err := d.profiles.FindOne(ctx, bson.M{"_id": "default"}).Decode(&profile)
+	err := d.profiles.FindOne(ctx, bson.M{"_id": id}).Decode(&profile)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			def := DefaultProfile()
-			_, insertErr := d.profiles.InsertOne(ctx, def)
-			if insertErr != nil {
-				return nil, fmt.Errorf("failed to insert default profile: %w", insertErr)
-			}
-			return &def, nil
-		}
-		return nil, fmt.Errorf("failed to fetch profile: %w", err)
+		return nil, err
 	}
 
 	if profile.Language == "" {
 		profile.Language = "it"
 	}
 
-	// Ensure all weekday presets are populated
 	if profile.WeekdayPresets == nil || len(profile.WeekdayPresets) < 7 {
 		def := DefaultProfile()
 		if profile.WeekdayPresets == nil {
@@ -185,15 +195,68 @@ func (d *Database) GetProfile() (*Profile, error) {
 	return &profile, nil
 }
 
+func (d *Database) GetProfile() (*Profile, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	targetID := d.activeProfileID
+	if targetID == "" {
+		var setDoc struct {
+			ProfileID string `bson:"profileId"`
+		}
+		if err := d.settings.FindOne(ctx, bson.M{"_id": "active_profile"}).Decode(&setDoc); err == nil && setDoc.ProfileID != "" {
+			targetID = setDoc.ProfileID
+			d.activeProfileID = targetID
+		}
+	}
+
+	if targetID != "" {
+		p, err := d.GetProfileByID(targetID)
+		if err == nil && p != nil {
+			return p, nil
+		}
+	}
+
+	// Try default profile
+	p, err := d.GetProfileByID("default")
+	if err == nil && p != nil {
+		d.activeProfileID = "default"
+		return p, nil
+	}
+
+	// Try any profile in DB
+	var list []Profile
+	cursor, err := d.profiles.Find(ctx, bson.M{})
+	if err == nil {
+		_ = cursor.All(ctx, &list)
+	}
+	if len(list) > 0 {
+		d.activeProfileID = list[0].ID
+		return &list[0], nil
+	}
+
+	// Fallback to inserting default profile
+	def := DefaultProfile()
+	_, insertErr := d.profiles.InsertOne(ctx, def)
+	if insertErr != nil {
+		return nil, fmt.Errorf("failed to insert default profile: %w", insertErr)
+	}
+	d.activeProfileID = def.ID
+	return &def, nil
+}
+
 func (d *Database) SaveProfile(p Profile) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	p.ID = "default"
-	_, err := d.profiles.ReplaceOne(ctx, bson.M{"_id": "default"}, p, options.Replace().SetUpsert(true))
+	if p.ID == "" {
+		p.ID = fmt.Sprintf("profile_%d", time.Now().UnixMilli())
+	}
+	_, err := d.profiles.ReplaceOne(ctx, bson.M{"_id": p.ID}, p, options.Replace().SetUpsert(true))
 	if err != nil {
 		return fmt.Errorf("failed to save profile: %w", err)
 	}
+	_ = d.SetActiveProfile(p.ID)
 	return nil
 }
 

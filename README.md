@@ -99,8 +99,9 @@ Pre-configured for standard hybrid schedules with automatic morning/afternoon sp
 - Directly opens in macOS **Preview** and saves to `~/Documents/Rapportini/Rapportino_YYYY_MM.pdf`.
 
 ### ⚙️ 5. Customizable Profile & Preset Settings (`Profile Page`)
-- **Interactive Client Profile Switcher**: Switch between client profiles directly from the top navigation bar via a stylized dropdown displaying the `"Ragione Sociale Committente"` (e.g., *MGN Consulting*).
-- **Smart Dirty-State & Navigation Guard**: The "Salva Modifiche" button remains disabled/inactive by default, activating only when non-language fields are edited. An interactive modal popup intercepts navigation attempts if unsaved modifications are pending.
+- **Interactive Client Profile Switcher & Modal Popup**: Triggered directly from the top navigation bar via a pill button displaying the Committente name (e.g., *MGN Consulting*). Clicking opens an elegant modal popup allowing users to seamlessly switch active clients or select "+ Aggiungi nuovo committente" (which immediately opens the settings page with a fresh profile template).
+- **Persistent Active Client in MongoDB**: Active profile selection is persisted to MongoDB (`settings` collection) so timesheet data, monthly revenue calculations, daily rates, and PDF reports automatically reflect the selected client.
+- **Smart Dirty-State & Navigation Guard**: The "Salva Modifiche" button remains disabled/inactive by default, activating only when fields are edited. An interactive modal popup intercepts navigation attempts if unsaved modifications are pending, with reference cloning ensuring reliable dirty-state detection even after dynamic locale changes.
 - **Instant Language Auto-Save**: Locale changes (Italian 🇮🇹, English 🇬🇧, Russian 🇷🇺) persist immediately to MongoDB in real time without leaving the settings form dirty.
 - **Fiscal & Preset Configuration**: Manage client details, contractor credentials, daily billing rates, revenue targets, and weekday work presets.
 

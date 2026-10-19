@@ -4,6 +4,11 @@ export const it: TranslationSchema = {
   nav: {
     brandSubtitle: 'Collaborazione P.IVA',
     profileSelectorAria: 'Seleziona Profilo Committente',
+    profileModalTitle: 'Profili Committenti',
+    profileModalDesc: 'Seleziona un committente per consultare i relativi dati o aggiungine uno nuovo:',
+    addNewProfileBtn: '+ Aggiungi nuovo committente',
+    activeProfileBadge: 'Attivo',
+    dailyRateBadge: (rate: number) => `€ ${rate}/giorno`,
     timesheet: 'Rapportino',
     stats: 'Statistiche',
     profile: 'Impostazioni',

@@ -33,6 +33,46 @@ func TestBackendFlow(t *testing.T) {
 		t.Errorf("Wednesday preset expected 17:30 and 8.0 hours, got %s and %f", wedPreset.AfternoonEnd, wedPreset.TotalHours)
 	}
 
+	// 2b. Test Multi-Profile: Save secondary profile and switch active profile
+	profileB := DefaultProfile()
+	profileB.ID = "profile_test_client_b"
+	profileB.ClientCompanyName = "Client Bravo SRL"
+	profileB.DailyRate = 220.0
+
+	err = db.SaveProfile(profileB)
+	if err != nil {
+		t.Fatalf("Failed to save profile B: %v", err)
+	}
+
+	allProfiles, err := db.GetAllProfiles()
+	if err != nil {
+		t.Fatalf("Failed to get all profiles: %v", err)
+	}
+	if len(allProfiles) < 2 {
+		t.Errorf("Expected at least 2 profiles, got %d", len(allProfiles))
+	}
+
+	activeP, err := db.GetProfile()
+	if err != nil {
+		t.Fatalf("Failed to get active profile: %v", err)
+	}
+	if activeP.ID != "profile_test_client_b" || activeP.DailyRate != 220.0 {
+		t.Errorf("Expected active profile to be Client Bravo, got %+v", activeP)
+	}
+
+	// Switch back to default
+	err = db.SetActiveProfile("default")
+	if err != nil {
+		t.Fatalf("Failed to set active profile back to default: %v", err)
+	}
+	activeDefault, err := db.GetProfile()
+	if err != nil {
+		t.Fatalf("Failed to get active profile after switch: %v", err)
+	}
+	if activeDefault.ID != "default" {
+		t.Errorf("Expected active profile to be default, got %s", activeDefault.ID)
+	}
+
 	// 3. Test SaveDayLog and GetDayLog
 	testDate := "2026-10-19"
 	testLog := WorkDayLog{

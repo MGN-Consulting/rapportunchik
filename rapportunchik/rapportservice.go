@@ -28,6 +28,13 @@ func (s *RapportService) SaveProfile(p Profile) error {
 	return DB.SaveProfile(p)
 }
 
+func (s *RapportService) SetActiveProfile(id string) error {
+	if DB == nil {
+		return fmt.Errorf("database not initialized")
+	}
+	return DB.SetActiveProfile(id)
+}
+
 func (s *RapportService) GetAllProfiles() ([]Profile, error) {
 	if DB == nil {
 		return nil, fmt.Errorf("database not initialized")

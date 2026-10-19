@@ -7,6 +7,7 @@
   import ProfileView from './lib/views/ProfileView.svelte';
   import Toast from './lib/components/Toast.svelte';
   import UnsavedChangesModal from './lib/components/UnsavedChangesModal.svelte';
+  import ProfileSelectorModal from './lib/components/ProfileSelectorModal.svelte';
 
   onMount(() => {
     appState.init();
@@ -28,6 +29,7 @@
 
   <Toast />
   <UnsavedChangesModal />
+  <ProfileSelectorModal />
 </div>
 
 <style>

@@ -4,6 +4,11 @@ export interface TranslationSchema {
   nav: {
     brandSubtitle: string;
     profileSelectorAria: string;
+    profileModalTitle: string;
+    profileModalDesc: string;
+    addNewProfileBtn: string;
+    activeProfileBadge: string;
+    dailyRateBadge: (rate: number) => string;
     timesheet: string;
     stats: string;
     profile: string;

@@ -4,6 +4,11 @@ export const en: TranslationSchema = {
   nav: {
     brandSubtitle: 'Contractor Timesheet',
     profileSelectorAria: 'Select Client Profile',
+    profileModalTitle: 'Client Profiles',
+    profileModalDesc: 'Select an active client to review timesheets or add a new one:',
+    addNewProfileBtn: '+ Add new client',
+    activeProfileBadge: 'Active',
+    dailyRateBadge: (rate: number) => `€ ${rate}/day`,
     timesheet: 'Timesheet',
     stats: 'Statistics',
     profile: 'Settings',
