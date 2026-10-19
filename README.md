@@ -1,6 +1,10 @@
 <div align="center">
 
-# 💰 Rapportunchik (Рапортунчик)
+<br>
+<img src="./rapportunchik/build/appicon.png" alt="Rapportunchik Logo" width="140" height="140" style="margin-top: 28px; margin-bottom: 28px; border-radius: 30px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);" />
+<br>
+
+# Rapportunchik (Рапортунчик)
 
 ### *The High-Performance Native Timesheet Logger & Italian "Rapportino" PDF Compiler*
 
@@ -9,7 +13,7 @@
 [![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://golang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.2+-000000?style=for-the-badge&logo=bun&logoColor=white)](https://bun.sh/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Local--First-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon%20%26%20Intel-000000?style=for-the-badge&logo=apple&logoColor=white)](https://apple.com)
+[![macOS](https://img.shields.io/badge/macOS-Tested%20%26%20Ready-000000?style=for-the-badge&logo=apple&logoColor=white)](https://apple.com)
 [![License](https://img.shields.io/badge/License-MD--NCSL%201.0-blue?style=for-the-badge)](./LICENSE.md)
 
 <p align="center">
@@ -30,6 +34,29 @@ Working as a software consultant or contractor (*Collaboratore a Partita IVA*) i
 Most freelancers are forced to wrestle with bloated subscription SaaS platforms, fragile Excel sheets, or clumsy manual PDF formatting.
 
 **Rapportunchik** solves this with a privacy-first, blazing-fast native desktop application crafted with **Wails V3**, a pure **Go** backend, and a reactive **Svelte 5** frontend driven by **Bun**. Your data remains 100% on your machine in a local MongoDB database.
+
+---
+
+## 📱 Multi-Platform Architecture & Roadmap
+
+> [!NOTE]
+> **Current Platform Status**: The application has currently been **tested and verified on macOS (macOSX)** on both Apple Silicon (M1/M2/M3/M4) and Intel architectures.
+
+Because **Wails V3** is inherently a cross-platform foundation, we will also **actively support**:
+- 🪟 **Windows PC**: Full native support via Microsoft Edge WebView2 runtime.
+- 🤖 **Android Phones**: Mobile timesheet logging on Android devices.
+- 🍏 **iOS Devices**: Companion mobile timesheet logging on iPhone and iPad.
+- 🐧 **Linux**: Native desktop support with WebKitGTK.
+
+---
+
+## 🌐 Localization & Languages (i18n)
+
+- 🇮🇹 **Italian (Italiano)**: **Currently implemented** — all timesheet fields, working presets, UI terminology, and official PDF statements are tailored for Italian labor conventions.
+- 🇬🇧 **English**: **Coming soon** in an upcoming release.
+- 🇷🇺 **Russian (Русский)**: **Coming soon** in an upcoming release.
+
+Language switching will be configurable directly inside the Profile & Settings view.
 
 ---
 
@@ -115,6 +142,19 @@ flowchart TD
 
 ---
 
+## 📚 Documentation & Contributing
+
+> [!TIP]
+> The [`docs/`](./docs) directory will be filled out soon with comprehensive guides, including:
+> - Full Application Architecture & IPC specifications
+> - Developer Guidelines & Contributing Code of Conduct
+> - Cross-platform build recipes (Windows, Android, iOS, Linux)
+> - MongoDB Schema & Data Export recipes
+
+We welcome community feedback, feature discussions, and bug reports through [GitHub Issues](https://github.com/MyHouseIsBig/rapportini/issues)!
+
+---
+
 ## 🚀 Quickstart & Development
 
 ### Prerequisites
@@ -173,8 +213,7 @@ rapportini/
 ├── .gitignore                    # Root repository ignore rules
 ├── LICENSE.md                    # MD-NCSL 1.0 License (Commercial rights reserved)
 ├── README.md                     # Project documentation & GitHub showcase
-├── docs/                         # Architecture & design documentation
-│   └── AI/                       # Implementation plans & walkthroughs
+├── docs/                         # App documentation & contribution guides (coming soon)
 └── rapportunchik/                # Main Wails V3 application project
     ├── Taskfile.yml              # Task orchestration for build & packaging
     ├── main.go                   # Wails V3 application entrypoint

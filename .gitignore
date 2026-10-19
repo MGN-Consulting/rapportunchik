@@ -91,3 +91,8 @@ mongo-data/
 # Generated User PDFs & Reports (exclude test/sample outputs)
 *.pdf
 !docs/**/*.pdf
+
+# AI & Internal Scaffolding Documents
+docs/AI/
+AI/
+**/AI/

@@ -1,4 +1,4 @@
-# 💰 Rapportunchik (Рапортунчик)
+# Rapportunchik (Рапортунчик)
 
 The application source code for **Rapportunchik**, a modern desktop timesheet logger and Italian *"Rapportino"* PDF engine built with **Wails V3**, **Go 1.24+**, and **Svelte 5 (Runes)** powered by **Bun**.
 
